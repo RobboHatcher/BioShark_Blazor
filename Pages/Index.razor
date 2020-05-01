@@ -1,0 +1,153 @@
+﻿
+@page "/"
+
+@using System;
+@using BioShark_Blazor.Data;
+@using static BioShark_Blazor.Data.Machine;
+@using BioShark_Blazor.Pages.ProcessButtons;
+
+@inject Machine _machine
+
+<h1>BioShark Control Panel</h1>
+<div class="container-fluid">
+    <div class="row text-center">
+        <div class="col-lg-4 text-center">
+            <h3>Readings</h3>
+            <table class="col-lg">
+                <tr><td>Mass</td><td>0</td><td>Units</td></tr>
+                <tr><td>HPHR</td><td>0</td><td>Units</td></tr>
+                <tr><td>HPLR</td><td>0</td><td>Units</td></tr>
+                <tr><td>Temp</td><td>0</td><td>Degrees</td></tr>
+                <tr><td>Humidity</td><td>0</td><td>%</td></tr>
+            </table>
+        </div>
+        <div class="col-lg-4 text-center">
+            <h3>Manual Part Control</h3>
+            <table class="col-lg">
+
+            @foreach(int val in Enum.GetValues(typeof(OutputPins)))
+            {
+                string localName = Enum.GetName(typeof(OutputPins), val);
+
+                int locali = val;
+                try{
+                    systemButtonStyle.Add(val, "btn btn-primary");
+                } catch (ArgumentException) {
+                    
+                }
+
+            }
+            <tr>
+                <td style="padding:10px"><button class="@systemButtonStyle[(int)OutputPins.Cat]" @onclick="@(()=>PressSensorButton((int)OutputPins.Cat))">Catalyst Fan</button></td>
+                <td style="padding:10px"><button class="@systemButtonStyle[(int)OutputPins.MistFan]" @onclick="@(()=>PressSensorButton((int)OutputPins.MistFan))">Mister Fan</button></td> 
+            </tr>
+            <tr >
+                <td style="padding:10px"><button class="@systemButtonStyle[(int)OutputPins.Sidekick]" @onclick="@(()=>PressSensorButton((int)OutputPins.Sidekick))">Sidekick</button></td>
+                <td style="padding:10px"><button class="@systemButtonStyle[(int)OutputPins.Heat]" @onclick="@(()=>PressSensorButton((int)OutputPins.Heat))">Heaters</button></td> 
+            </tr>
+            <tr>
+                <td style="padding:10px"><button class="@systemButtonStyle[(int)OutputPins.FillPump]" @onclick="@(()=>PressSensorButton((int)OutputPins.FillPump))" disabled>Fill Pump</button></td>
+                <td style="padding:10px"><button class="@systemButtonStyle[(int)OutputPins.Distribution]" @onclick="@(()=>PressSensorButton((int)OutputPins.Distribution))">Distribution Fan</button></td> 
+            </tr>
+            <tr>
+                <td style="padding:10px"><button class="@systemButtonStyle[(int)OutputPins.RunPump]" @onclick="@(()=>PressSensorButton((int)OutputPins.RunPump))" disabled>Run Pump</button></td>
+                <td style="padding:10px"><button class="@systemButtonStyle[(int)OutputPins.HRCat]" @onclick="@(()=>PressSensorButton((int)OutputPins.HRCat))">HRCat Fan</button></td> 
+            </tr>
+            <tr>
+                <td style="padding:10px"><button class="@systemButtonStyle[(int)OutputPins.Mist]" @onclick="@(()=>PressSensorButton((int)OutputPins.Mist))">Mister</button></td>
+                <td style="padding:10px"><button class="@systemButtonStyle[(int)OutputPins.LRCat]" @onclick="@(()=>PressSensorButton((int)OutputPins.LRCat))">LRCat Fan</button></td> 
+            </tr>
+            <tr>
+                <td style="padding:10px"><button class="@systemButtonStyle[(int)OutputPins.Blower]" @onclick="@(()=>PressSensorButton((int)OutputPins.Blower))">Blowers</button></td>
+                <td style="padding:10px"><button class="@systemButtonStyle[(int)OutputPins.Drainpump]" @onclick="@(()=>PressSensorButton((int)OutputPins.Drainpump))">Drain Pump</button></td> 
+            </tr>
+            </table>
+        </div>
+        <div class="col-lg-4 text-center">
+            <h3>Automatic Procedures</h3>
+             <table class="col-lg">
+                <tr style="padding:10px"><button class="@processButtonStyle[0]" @onclick="@(()=>ProcessToggle(0))">Run Pump w/ Auto-Off</button></tr>
+                <tr style="padding:10px"><button class="@processButtonStyle[1]" @onclick="@(()=>ProcessToggle(1))">LR Oscillator</button></tr>
+                <tr style="padding:10px"><button class="@processButtonStyle[2]" @onclick="@(()=>ProcessToggle(2))">Drain Pump w/ Auto-Off</button></tr>
+                <br/>
+                <tr style="padding:10px"><button class="@processButtonStyle[3]" @onclick="@(()=>ProcessToggle(3))">Auto Cycle</button></tr>
+                <tr style="padding:10px"><button class="btn btn-info btn-block">Early Stop Cycle</button></tr>
+                <tr style="padding:10px"><button class="btn btn-danger btn-block">Emergency Stop Cycle</button></tr>
+                
+             </table>
+        </div>
+    </div>
+</div>
+
+@code{
+    private Dictionary<int,string> systemButtonStyle;
+
+    private List<string> processButtonStyle;
+
+    private List<IProcessButton> ProcessButtons;
+    
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        systemButtonStyle = new Dictionary<int,string>();
+        processButtonStyle = new List<string>();
+        for(int i =0; i < 4; i++)
+        {
+            processButtonStyle.Add("btn btn-primary btn-block");
+        }
+
+        ProcessButtons = new List<IProcessButton>();
+        ProcessButtons.Add(new RunPumpAutoTrigger(_machine));
+        ProcessButtons.Add(new LROscillatorTrigger(_machine));
+        ProcessButtons.Add(new DrainPumpAutoTrigger(_machine));
+        ProcessButtons.Add(new AutoCycleProcessTrigger(_machine));
+
+        UpdateButtonStyles();
+    }
+
+    private void PressSensorButton(int i)
+    {
+        
+        if(_machine.IsOn(i))
+        {
+            _machine.TurnOff(i);
+        }
+
+        else {
+            _machine.TurnOn(i);
+        }
+        
+        UpdateButtonStyles();
+        
+    }
+
+    private void ProcessToggle(int i)
+    {
+        if(!ProcessButtons[i].GetProcessState())
+        {
+            ProcessButtons[i].StartProcess();
+        }
+        else ProcessButtons[i].EndProcess();
+        UpdateButtonStyles();
+    }
+
+    private void UpdateButtonStyles()
+    {
+        foreach(int val in Enum.GetValues(typeof(OutputPins)))
+        {
+            if(_machine.IsOn(val))
+            {
+                systemButtonStyle[val] = "btn btn-warning btn-block";
+            }
+            else systemButtonStyle[val] = "btn btn-primary btn-block";
+        }
+    
+        for(int i = 0; i < 4; i++)
+        {
+            processButtonStyle[i] = ProcessButtons[i].GetButtonClass();
+        }
+        this.StateHasChanged();
+    }
+    
+
+}
