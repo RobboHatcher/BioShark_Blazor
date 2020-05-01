@@ -46,7 +46,7 @@ namespace BioShark_Blazor.Data {
             _sensors.Add (new Sensor ((int) OutputPins.Distribution, false));
             _sensors.Add (new Sensor ((int) OutputPins.HRCat, false));
             _sensors.Add (new Sensor ((int) OutputPins.Sidekick, false));
-            _sensors.Add (new Sensor ((int) OutputPins.Drainpump, false));
+            _sensors.Add (new Sensor ((int) OutputPins.Drainpump, true));
 
             foreach (var sensor in _sensors) {
                 OpenOutPinToOffState (sensor.PinNum);
