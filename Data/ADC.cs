@@ -1,4 +1,7 @@
 using System;
+using System.Threading;
+using System.Threading.Tasks;
+
 using System.Collections.Generic;
 using System.Device.Gpio;
 using System.Device.Spi;
@@ -11,23 +14,183 @@ namespace BioShark_Blazor.Data {
 
         public enum ADCOutPins { ResetPin = 22, ConvertStartPin = 24 }
         public enum ADCInPins { BusyPin = 25 }
-        GpioController _analogIn;
+        GpioController _adcControl;
+        SpiDevice spi;
+
+
+        public enum ReadingTypes { Mass, HPHR, HPLR, RH, Temp }
+        
+        
+        private int NaNCounter = 0;
+        private int SampleNum = 0;
+        // For storing the sum of the readings until averaged
+        private double[] readSums = {0,0,0,0,0};
+        private double[] Avgs = {0,0,0,0,0};
+        public double[] ScaledNums = {0,0,0,0,0};
 
         public List<ADCPin> _inputs;
         public List<ADCPin> _outputs;  
 
+        public bool busyReading = false;
+        public bool busyAveraging = false;
+        public bool busyCalibrating = false;
+
+
+        public double[] Readings {get;set;} = {0,0,0,0,0};
+
         public ADC() {
-            _analogIn = new GpioController();
-            
+            _adcControl = new GpioController();
+            // Initialize SPI
+            InitSPI();
+
+            // Initialize Digital Pins
+            _adcControl.OpenPin((int)ADCInPins.BusyPin, PinMode.Input);
+            _adcControl.OpenPin((int)ADCOutPins.ResetPin, PinMode.Output);
+            _adcControl.OpenPin((int)ADCOutPins.ConvertStartPin, PinMode.Output);
+
+            // ADC Setup
+            ADCReset();
+            Task.Run(() => ADCLoop());
+            Task.Run(() => AverageValuesSendDataPoint());
         }
 
         public void InitSPI(){
+            var settings = new SpiConnectionSettings(0,0){
+                ClockFrequency = 25000000,
+                Mode = SpiMode.Mode3,
+            };
 
+            spi = SpiDevice.Create(settings);
+
+            Console.WriteLine(spi.ToString());
+
+            
+
+        }
+
+        public void ADCLoop() {
+            
+            while(true){
+                if(_adcControl.Read((int)ADCInPins.BusyPin) == PinValue.Low){
+
+                    busyReading = true;
+
+                    double[] ADCValues = Read();
+
+                    for(int i = 0; i < readSums.Length; i ++){
+                        readSums[i] += ADCValues[i];
+                    }
+
+                    busyReading = false;
+
+                    while(busyAveraging){}
+                    
+                    _adcControl.Write((int)ADCOutPins.ConvertStartPin, PinValue.Low);
+                    _adcControl.Write((int)ADCOutPins.ConvertStartPin, PinValue.High);
+                }
+            }
+            
+        }
+
+        private void AverageValuesSendDataPoint(){
+            while(true)
+            {
+                Thread.Sleep(250);
+
+                while(busyReading) {};
+
+                busyAveraging = true;
+
+                if (SampleNum > 0)
+                {
+
+                    for (int i = 0; i < Avgs.Length; i++)
+                    {
+                        Avgs[i] = readSums[i] / SampleNum;
+                        readSums[i] = 0;
+                    }
+                    SampleNum = 0;
+                }
+                else {Console.WriteLine("Caught a zero sample point.");}
+
+                busyAveraging = false;
+
+                while(busyCalibrating) {}
+
+                ScaledNums = ComputeScaledValues();
+            }
+        }
+
+
+        private double[] ComputeScaledValues(){
+            // Placeholder
+            return Avgs;
+        }
+        private double[] Read(){
+
+            double[] returnVals = new double[5];
+
+            string ConversionBuffer = "";
+            byte[] bytebuf = new byte[16];
+
+            spi.Read(bytebuf);
+            
+            // Iterate through bytes 1-10; each ADC Line has 2 bytes of information sent with it.
+
+            for(int i = 0; i < 10; i++)
+            {
+                //0,2,4,6,8
+                if(i%2 == 0){
+                    // 16-bit first value
+                    ConversionBuffer += Convert.ToString(bytebuf[i], 2).PadLeft(8, '0');
+                }
+                //1,3,5,7,9
+                else{
+                    ConversionBuffer += Convert.ToString(bytebuf[i], 2).PadLeft(8, '0');// Padded with another byte for 16-bit float value
+                    returnVals[i/2] = Convert.ToInt32(ConversionBuffer, 2);
+                    ConversionBuffer = "";
+                }
+
+                
+            }
+            // Check that none of our array values are NaN
+
+            bool GoodValues = true;
+            foreach(double val in returnVals){
+                if(val == 0) GoodValues = false;
+            }
+
+            if(GoodValues)
+            {
+                SampleNum++;
+                NaNCounter = 0;
+            }
+            else{
+                ADCReset();
+                for(int i = 0; i < returnVals.Length; i++)
+                {
+                    returnVals[i] = 0;
+                }
+                NaNCounter++;
+            }
+
+            return returnVals;
+            
+        }
+
+        public void ADCReset(){
+            _adcControl.Write((int)ADCOutPins.ResetPin, PinValue.High);
+            Thread.Sleep(5);
+            _adcControl.Write((int)ADCOutPins.ResetPin, PinValue.Low);
+            
+            _adcControl.Write((int)ADCOutPins.ConvertStartPin, PinValue.Low);
+            _adcControl.Write((int)ADCOutPins.ConvertStartPin, PinValue.High);
         }
     }
 
     public class ADCPin {
-        
+        public bool isInput;
+
     }
 
 }

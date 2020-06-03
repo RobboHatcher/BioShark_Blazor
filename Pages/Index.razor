@@ -5,8 +5,11 @@
 @using BioShark_Blazor.Data;
 @using static BioShark_Blazor.Data.Machine;
 @using BioShark_Blazor.Pages.ProcessButtons;
+@using System.Threading;
+@using System.Threading.Tasks;
 
 @inject Machine _machine
+@inject ADC _adc
 
 <h1>BioShark Control Panel</h1>
 <div class="container-fluid">
@@ -14,11 +17,11 @@
         <div class="col-lg-4 text-center">
             <h3>Readings</h3>
             <table class="col-lg">
-                <tr><td>Mass</td><td>0</td><td>Units</td></tr>
-                <tr><td>HPHR</td><td>0</td><td>Units</td></tr>
-                <tr><td>HPLR</td><td>0</td><td>Units</td></tr>
-                <tr><td>Temp</td><td>0</td><td>Degrees</td></tr>
-                <tr><td>Humidity</td><td>0</td><td>%</td></tr>
+                <tr><td>Mass</td><td>@Readings[(int)ADC.ReadingTypes.Mass]</td><td>Units</td></tr>
+                <tr><td>HPHR</td><td>@Readings[(int)ADC.ReadingTypes.HPHR]</td><td>Units</td></tr>
+                <tr><td>HPLR</td><td>@Readings[(int)ADC.ReadingTypes.HPLR]</td><td>Units</td></tr>
+                <tr><td>Temp</td><td>@Readings[(int)ADC.ReadingTypes.Temp]</td><td>Degrees</td></tr>
+                <tr><td>Humidity</td><td>@Readings[(int)ADC.ReadingTypes.RH]</td><td>%</td></tr>
             </table>
         </div>
         <div class="col-lg-4 text-center">
@@ -85,6 +88,8 @@
     private List<string> processButtonStyle;
 
     private List<IProcessButton> ProcessButtons;
+
+    private List<double> Readings;
     
     protected override void OnInitialized()
     {
@@ -103,8 +108,22 @@
         ProcessButtons.Add(new AutoCycleProcessTrigger(_machine));
 
         UpdateButtonStyles();
+        Readings = new List<double>();
+        foreach(double val in _adc.ScaledNums){
+            Readings.Add(0);
+        }
+        Task.Run(() => UpdateLoop());
     }
 
+
+    private void UpdateLoop(){
+        while(true){
+            Thread.Sleep(250);
+            for(int i = 0; i < 5; i ++){
+                Readings[i] = Math.Round(_adc.ScaledNums[i], 2);
+            }
+        }
+    }
     private void PressSensorButton(int i)
     {
         
