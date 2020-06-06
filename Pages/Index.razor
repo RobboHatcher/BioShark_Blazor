@@ -17,11 +17,11 @@
         <div class="col-lg-4 text-center">
             <h3>Readings</h3>
             <table class="col-lg">
-                <tr><td>Mass</td><td>@Readings[(int)ADC.ReadingTypes.Mass]</td><td>Units</td></tr>
-                <tr><td>HPHR</td><td>@Readings[(int)ADC.ReadingTypes.HPHR]</td><td>Units</td></tr>
-                <tr><td>HPLR</td><td>@Readings[(int)ADC.ReadingTypes.HPLR]</td><td>Units</td></tr>
-                <tr><td>Temp</td><td>@Readings[(int)ADC.ReadingTypes.Temp]</td><td>Degrees</td></tr>
-                <tr><td>Humidity</td><td>@Readings[(int)ADC.ReadingTypes.RH]</td><td>%</td></tr>
+                <tr><td>Mass</td><td>@Mass.ToString()</td><td>Units</td></tr>
+                <tr><td>HPHR</td><td>@HPHR.ToString()</td><td>Units</td></tr>
+                <tr><td>HPLR</td><td>@HPLR.ToString()</td><td>Units</td></tr>
+                <tr><td>Temp</td><td>@Temp.ToString()</td><td>Degrees</td></tr>
+                <tr><td>Humidity</td><td>@RH.ToString()</td><td>%</td></tr>
             </table>
         </div>
         <div class="col-lg-4 text-center">
@@ -91,6 +91,7 @@
 
     private List<double> Readings;
     
+    private double Mass, HPHR, HPLR, Temp, RH;
     protected override void OnInitialized()
     {
         base.OnInitialized();
@@ -109,19 +110,34 @@
 
         UpdateButtonStyles();
         Readings = new List<double>();
+        Mass = 0;
+        HPHR = 0;
+        HPLR = 0;
+        Temp = 0;
+        RH = 0;
         foreach(double val in _adc.ScaledNums){
             Readings.Add(0);
         }
-        Task.Run(() => UpdateLoop());
+        Task.Run(async () => await UpdateLoop());
+        
     }
 
 
-    private void UpdateLoop(){
+    private async Task UpdateLoop(){
         while(true){
             Thread.Sleep(250);
             for(int i = 0; i < 5; i ++){
                 Readings[i] = Math.Round(_adc.ScaledNums[i], 2);
             }
+            Mass = Readings[(int)ADC.ReadingTypes.Mass];
+            HPHR = Readings[(int)ADC.ReadingTypes.HPHR];
+            HPLR = Readings[(int)ADC.ReadingTypes.HPLR];
+            Temp = Readings[(int)ADC.ReadingTypes.Temp];
+            RH = Readings[(int)ADC.ReadingTypes.RH];
+
+            await InvokeAsync(()=> {
+                StateHasChanged();
+            });
         }
     }
     private void PressSensorButton(int i)

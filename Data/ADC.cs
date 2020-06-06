@@ -7,6 +7,8 @@ using System.Device.Gpio;
 using System.Device.Spi;
 using System.IO;
 
+
+
 namespace BioShark_Blazor.Data {
 
     
@@ -28,6 +30,9 @@ namespace BioShark_Blazor.Data {
         private double[] Avgs = {0,0,0,0,0};
         public double[] ScaledNums = {0,0,0,0,0};
 
+
+        public double[] ZeroOffsets = {0,0,0,0,0};
+        public double[] ScaleFactors = {1,1,1,1,1};
         public List<ADCPin> _inputs;
         public List<ADCPin> _outputs;  
 
@@ -43,10 +48,24 @@ namespace BioShark_Blazor.Data {
             // Initialize SPI
             InitSPI();
 
+
             // Initialize Digital Pins
             _adcControl.OpenPin((int)ADCInPins.BusyPin, PinMode.Input);
             _adcControl.OpenPin((int)ADCOutPins.ResetPin, PinMode.Output);
             _adcControl.OpenPin((int)ADCOutPins.ConvertStartPin, PinMode.Output);
+
+
+            ScaleFactors[(int)ReadingTypes.Mass] = (31130-125 )/ 4500;
+            ScaleFactors[(int)ReadingTypes.HPHR] = (12.53 - 4) / 533;
+            ScaleFactors[(int)ReadingTypes.HPLR] = (14.24 - 4) / 6.4;
+            ScaleFactors[(int)ReadingTypes.RH] = (3.182298 - 0.865195) / 75.3;
+
+
+            ZeroOffsets[(int)ReadingTypes.Mass] = 125;
+            ZeroOffsets[(int)ReadingTypes.HPHR] = 4 * ScaleFactors[(int)ReadingTypes.HPHR];
+            ZeroOffsets[(int)ReadingTypes.HPLR] = 4 * ScaleFactors[(int)ReadingTypes.HPLR];
+            ZeroOffsets[(int)ReadingTypes.RH] = 0.865195 * ScaleFactors[(int)ReadingTypes.RH];
+
 
             // ADC Setup
             ADCReset();
@@ -71,6 +90,7 @@ namespace BioShark_Blazor.Data {
         public void ADCLoop() {
             
             while(true){
+
                 if(_adcControl.Read((int)ADCInPins.BusyPin) == PinValue.Low){
 
                     busyReading = true;
@@ -83,7 +103,7 @@ namespace BioShark_Blazor.Data {
 
                     busyReading = false;
 
-                    while(busyAveraging){}
+                    //while(busyAveraging){}
                     
                     _adcControl.Write((int)ADCOutPins.ConvertStartPin, PinValue.Low);
                     _adcControl.Write((int)ADCOutPins.ConvertStartPin, PinValue.High);
@@ -124,17 +144,36 @@ namespace BioShark_Blazor.Data {
 
         private double[] ComputeScaledValues(){
             // Placeholder
-            return Avgs;
+
+            double[] ComputedArray = new double[ScaledNums.Length];
+
+            for(int i = 0;  i < ScaledNums.Length; i++){
+                if (i < 3){
+                    ComputedArray[i] = (Avgs[i] - ZeroOffsets[i]) * ScaleFactors[i];
+                }
+
+                else if (i == (int)(ReadingTypes.Temp)){
+                    // Analog to Kelvin
+                    double AnalogTempResult = Avgs[i] / 6553.6;
+                    AnalogTempResult = 100000 * ((4.88 / AnalogTempResult) - 1);
+                    AnalogTempResult = 1 / (0.000828083 + (0.000208691 * Math.Log(AnalogTempResult)) + 
+                        (0.000000080812 * Math.Pow(Math.Log(AnalogTempResult), 3)));
+                    
+                    ComputedArray[i] = AnalogTempResult - 273.15;
+                }
+
+                else if (i == (int)(ReadingTypes.RH)){
+                    ComputedArray[i] = (Avgs[i] - ZeroOffsets[i]) * ScaleFactors[i];
+                }
+            }
+            return ComputedArray;
         }
         private double[] Read(){
 
             double[] returnVals = new double[5];
-
             string ConversionBuffer = "";
             byte[] bytebuf = new byte[16];
-
             spi.Read(bytebuf);
-            
             // Iterate through bytes 1-10; each ADC Line has 2 bytes of information sent with it.
 
             for(int i = 0; i < 10; i++)
@@ -154,7 +193,6 @@ namespace BioShark_Blazor.Data {
                 
             }
             // Check that none of our array values are NaN
-
             bool GoodValues = true;
             foreach(double val in returnVals){
                 if(val == 0) GoodValues = false;
