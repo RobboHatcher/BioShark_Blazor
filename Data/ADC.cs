@@ -60,7 +60,6 @@ namespace BioShark_Blazor.Data {
             ScaleFactors[(int)ReadingTypes.HPLR] = (14.24 - 4) / 6.4;
             ScaleFactors[(int)ReadingTypes.RH] = (3.182298 - 0.865195) / 75.3;
 
-
             ZeroOffsets[(int)ReadingTypes.Mass] = 125;
             ZeroOffsets[(int)ReadingTypes.HPHR] = 4 * ScaleFactors[(int)ReadingTypes.HPHR];
             ZeroOffsets[(int)ReadingTypes.HPLR] = 4 * ScaleFactors[(int)ReadingTypes.HPLR];
@@ -82,9 +81,6 @@ namespace BioShark_Blazor.Data {
             spi = SpiDevice.Create(settings);
 
             Console.WriteLine(spi.ToString());
-
-            
-
         }
 
         public void ADCLoop() {
@@ -141,9 +137,13 @@ namespace BioShark_Blazor.Data {
             }
         }
 
+        private void InitializeScaleAndOffset(){
+            
+            ScaleFactors[(int)ReadingTypes.Mass] = 
+        }
 
         private double[] ComputeScaledValues(){
-            // Placeholder
+
 
             double[] ComputedArray = new double[ScaledNums.Length];
 
@@ -168,6 +168,7 @@ namespace BioShark_Blazor.Data {
             }
             return ComputedArray;
         }
+
         private double[] Read(){
 
             double[] returnVals = new double[5];
