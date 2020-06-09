@@ -31,8 +31,7 @@ namespace BioShark_Blazor.Data {
         public double[] ScaledNums = {0,0,0,0,0};
 
 
-        public double[] ZeroOffsets = {0,0,0,0,0};
-        public double[] ScaleFactors = {1,1,1,1,1};
+        private ScalingVals _scale = new ScalingVals();
         public List<ADCPin> _inputs;
         public List<ADCPin> _outputs;  
 
@@ -53,18 +52,11 @@ namespace BioShark_Blazor.Data {
             _adcControl.OpenPin((int)ADCInPins.BusyPin, PinMode.Input);
             _adcControl.OpenPin((int)ADCOutPins.ResetPin, PinMode.Output);
             _adcControl.OpenPin((int)ADCOutPins.ConvertStartPin, PinMode.Output);
-
-
-            ScaleFactors[(int)ReadingTypes.Mass] = (31130-125 )/ 4500;
-            ScaleFactors[(int)ReadingTypes.HPHR] = (12.53 - 4) / 533;
-            ScaleFactors[(int)ReadingTypes.HPLR] = (14.24 - 4) / 6.4;
-            ScaleFactors[(int)ReadingTypes.RH] = (3.182298 - 0.865195) / 75.3;
-
-            ZeroOffsets[(int)ReadingTypes.Mass] = 125;
-            ZeroOffsets[(int)ReadingTypes.HPHR] = 4 * ScaleFactors[(int)ReadingTypes.HPHR];
-            ZeroOffsets[(int)ReadingTypes.HPLR] = 4 * ScaleFactors[(int)ReadingTypes.HPLR];
-            ZeroOffsets[(int)ReadingTypes.RH] = 0.865195 * ScaleFactors[(int)ReadingTypes.RH];
-
+            _scale.InitializeTest();
+            _scale.ScaleFactorsUpdate();
+            
+            
+            
 
             // ADC Setup
             ADCReset();
@@ -138,8 +130,8 @@ namespace BioShark_Blazor.Data {
         }
 
         private void InitializeScaleAndOffset(){
+
             
-            ScaleFactors[(int)ReadingTypes.Mass] = 
         }
 
         private double[] ComputeScaledValues(){
@@ -149,7 +141,7 @@ namespace BioShark_Blazor.Data {
 
             for(int i = 0;  i < ScaledNums.Length; i++){
                 if (i < 3){
-                    ComputedArray[i] = (Avgs[i] - ZeroOffsets[i]) * ScaleFactors[i];
+                    ComputedArray[i] = (Avgs[i] - _scale.ZeroOffsets[i]) * _scale.ScaleFactors[i];
                 }
 
                 else if (i == (int)(ReadingTypes.Temp)){
@@ -163,7 +155,7 @@ namespace BioShark_Blazor.Data {
                 }
 
                 else if (i == (int)(ReadingTypes.RH)){
-                    ComputedArray[i] = (Avgs[i] - ZeroOffsets[i]) * ScaleFactors[i];
+                    ComputedArray[i] = (Avgs[i] - _scale.ZeroOffsets[i]) * _scale.ScaleFactors[i];
                 }
             }
             return ComputedArray;
