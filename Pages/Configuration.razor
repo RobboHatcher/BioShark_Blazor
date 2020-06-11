@@ -2,15 +2,18 @@
 
 @using System;
 @using BioShark_Blazor.Data;
-@using static BioShark_Blazor.Data.Machine;
-@using BioShark_Blazor.Pages.ProcessButtons;
-@using System.Threading;
-@using System.Threading.Tasks;
+@using BioShark_Blazor.Pages.Components;
 
-@inject Machine _machine
 @inject ADC _adc
 
 <h1>Configuration Panel</h1>
+<div class="container-fluid">
+    <div class="row text-center">
+        <ReadingsComponent />
+    </div>
+</div>
+
+
 
 @code {
     
