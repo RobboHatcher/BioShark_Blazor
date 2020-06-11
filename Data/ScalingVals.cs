@@ -1,24 +1,48 @@
 using System;
-using System.Runtime.Serialization;
+using System.Xml;
+using System.Xml.Serialization;
+using System.IO;
+
 using static BioShark_Blazor.Data.ADC;
 
 namespace BioShark_Blazor.Data {
 
-    public class ScalingVals {
+    public class ScalingVals  {
 
         // To keep things consistent, we have 5 numbers in the array, but the Temperature value is not used
+
         private enum Boundaries {Lower, Upper};
+
+        
+        [XmlAttribute]
         public double[] ScaleFactors {get;set;} = {0,0,0,0,0};
+        
+        [XmlAttribute]
         public double[] ZeroOffsets {get;set;} = {0,0,0,0,0};
         
+        [XmlAttribute]
         public double[] MassCount = new double[2];
+        [XmlAttribute]
         public double[] MassValue = new double[2];
+        
+        [XmlAttribute]
         public double[] HPHRCount = new double[2];
+
+        [XmlAttribute]
         public double[] HPHRValue = new double[2];
+
+        [XmlAttribute]
         public double[] HPLRCount = new double[2];
+
+        [XmlAttribute]
         public double[] HPLRValue = new double[2];
+
+        [XmlAttribute]
         public double[] RHCount = new double[2];
+
+        [XmlAttribute]
         public double[] RHValue = new double[2];
+        
 
 
         public void InitializeTest(){
@@ -46,7 +70,20 @@ namespace BioShark_Blazor.Data {
             ZeroOffsets[(int)ReadingTypes.HPHR] = (HPHRCount[0] * 250 * 6553.6/1000) - (HPHRValue[0]/ScaleFactors[(int)ReadingTypes.HPHR]);
             ZeroOffsets[(int)ReadingTypes.HPLR] = (HPLRCount[0] * 250 * 6553.6/1000) - (HPLRValue[0]/ScaleFactors[(int)ReadingTypes.HPLR]);
             ZeroOffsets[(int)ReadingTypes.RH] = (RHCount[0] * 6553.6) - (RHValue[0] / ScaleFactors[(int)ReadingTypes.RH]);
-            
+        }
+
+
+        public void StoreData()
+        {
+            XmlSerializer ser = new XmlSerializer(typeof(ScalingVals));
+            TextWriter writer = new StreamWriter("~/BioShark Data/Calibration.xml");
+            ser.Serialize(writer, this);
+            writer.Close();
+        }
+
+        public static ScalingVals FetchData()
+        {
+            return new ScalingVals();
         }
 
     }

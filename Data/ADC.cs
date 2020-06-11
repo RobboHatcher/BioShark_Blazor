@@ -136,12 +136,7 @@ namespace BioShark_Blazor.Data {
                 ScaledNums = ComputeScaledValues();
             }
         }
-
-        private void InitializeScaleAndOffset(){
-            
-            ScaleFactors[(int)ReadingTypes.Mass] = 
-        }
-
+        
         private double[] ComputeScaledValues(){
 
 
