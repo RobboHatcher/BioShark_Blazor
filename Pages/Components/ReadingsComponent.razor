@@ -1,0 +1,58 @@
+@using System;
+@using System.Threading;
+@using System.Threading.Tasks;
+@using BioShark_Blazor.Data;
+
+
+@inject ADC _adc
+
+<div class="col-lg-4 text-center">
+    <h3>Readings</h3>
+    <table class="col-lg">
+        <tr><td>Mass</td><td>@Mass.ToString()</td><td>Units</td></tr>
+        <tr><td>HPHR</td><td>@HPHR.ToString()</td><td>Units</td></tr>
+        <tr><td>HPLR</td><td>@HPLR.ToString()</td><td>Units</td></tr>
+        <tr><td>Temp</td><td>@Temp.ToString()</td><td>Degrees</td></tr>
+        <tr><td>Humidity</td><td>@RH.ToString()</td><td>%</td></tr>
+    </table>
+</div>
+
+@code{
+    private List<double> Readings;
+    
+    private double Mass, HPHR, HPLR, Temp, RH;
+
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        Readings = new List<double>();
+        Mass = 0;
+        HPHR = 0;
+        HPLR = 0;
+        Temp = 0;
+        RH = 0;
+        foreach(double val in _adc.ScaledNums){
+            Readings.Add(0);
+        }
+        Task.Run(async () => await UpdateLoop());
+    }
+
+    private async Task UpdateLoop(){
+        while(true){
+            Thread.Sleep(250);
+            for(int i = 0; i < 5; i ++){
+                Readings[i] = Math.Round(_adc.ScaledNums[i], 2);
+            }
+            Mass = Readings[(int)ADC.ReadingTypes.Mass];
+            HPHR = Readings[(int)ADC.ReadingTypes.HPHR];
+            HPLR = Readings[(int)ADC.ReadingTypes.HPLR];
+            Temp = Readings[(int)ADC.ReadingTypes.Temp];
+            RH = Readings[(int)ADC.ReadingTypes.RH];
+
+            await InvokeAsync(()=> {
+                StateHasChanged();
+            });
+        }
+    }
+}

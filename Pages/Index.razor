@@ -5,8 +5,7 @@
 @using BioShark_Blazor.Data;
 @using static BioShark_Blazor.Data.Machine;
 @using BioShark_Blazor.Pages.ProcessButtons;
-@using System.Threading;
-@using System.Threading.Tasks;
+@using BioShark_Blazor.Pages.Components;
 
 @inject Machine _machine
 @inject ADC _adc
@@ -14,31 +13,19 @@
 <h1>BioShark Control Panel</h1>
 <div class="container-fluid">
     <div class="row text-center">
-        <div class="col-lg-4 text-center">
-            <h3>Readings</h3>
-            <table class="col-lg">
-                <tr><td>Mass</td><td>@Mass.ToString()</td><td>Units</td></tr>
-                <tr><td>HPHR</td><td>@HPHR.ToString()</td><td>Units</td></tr>
-                <tr><td>HPLR</td><td>@HPLR.ToString()</td><td>Units</td></tr>
-                <tr><td>Temp</td><td>@Temp.ToString()</td><td>Degrees</td></tr>
-                <tr><td>Humidity</td><td>@RH.ToString()</td><td>%</td></tr>
-            </table>
-        </div>
+        <ReadingsComponent/>
         <div class="col-lg-4 text-center">
             <h3>Manual Part Control</h3>
             <table class="col-lg">
-
             @foreach(int val in Enum.GetValues(typeof(OutputPins)))
             {
                 string localName = Enum.GetName(typeof(OutputPins), val);
-
                 int locali = val;
                 try{
                     systemButtonStyle.Add(val, "btn btn-primary");
                 } catch (ArgumentException) {
                     
                 }
-
             }
             <tr>
                 <td style="padding:10px"><button class="@systemButtonStyle[(int)OutputPins.Cat]" @onclick="@(()=>PressSensorButton((int)OutputPins.Cat))">Catalyst Fan</button></td>
@@ -89,9 +76,7 @@
 
     private List<IProcessButton> ProcessButtons;
 
-    private List<double> Readings;
-    
-    private double Mass, HPHR, HPLR, Temp, RH;
+
     protected override void OnInitialized()
     {
         base.OnInitialized();
@@ -109,37 +94,12 @@
         ProcessButtons.Add(new AutoCycleProcessTrigger(_machine));
 
         UpdateButtonStyles();
-        Readings = new List<double>();
-        Mass = 0;
-        HPHR = 0;
-        HPLR = 0;
-        Temp = 0;
-        RH = 0;
-        foreach(double val in _adc.ScaledNums){
-            Readings.Add(0);
-        }
-        Task.Run(async () => await UpdateLoop());
+        
         
     }
 
 
-    private async Task UpdateLoop(){
-        while(true){
-            Thread.Sleep(250);
-            for(int i = 0; i < 5; i ++){
-                Readings[i] = Math.Round(_adc.ScaledNums[i], 2);
-            }
-            Mass = Readings[(int)ADC.ReadingTypes.Mass];
-            HPHR = Readings[(int)ADC.ReadingTypes.HPHR];
-            HPLR = Readings[(int)ADC.ReadingTypes.HPLR];
-            Temp = Readings[(int)ADC.ReadingTypes.Temp];
-            RH = Readings[(int)ADC.ReadingTypes.RH];
-
-            await InvokeAsync(()=> {
-                StateHasChanged();
-            });
-        }
-    }
+    
     private void PressSensorButton(int i)
     {
         
