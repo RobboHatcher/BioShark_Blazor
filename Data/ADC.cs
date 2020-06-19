@@ -31,7 +31,7 @@ namespace BioShark_Blazor.Data {
         public double[] ScaledNums = {0,0,0,0,0};
 
 
-        private ScalingVals _scale = new ScalingVals();
+        public ScalingVals _scale {get;set;} = new ScalingVals();
         public List<ADCPin> _inputs;
         public List<ADCPin> _outputs;  
 

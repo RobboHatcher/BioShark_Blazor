@@ -10,13 +10,46 @@
 <div class="container-fluid">
     <div class="row text-center">
         <ReadingsComponent />
+        <div class="col-lg-8 text-center">
+            <h3>Calibration Values</h3>
+            <EditForm Model="@_adc._scale" class="col-lg">
+                <InputNumber id="Mass Low Count" @bind-Value=@_adc._scale.MassCount[0]/>
+                <InputNumber id="Mass High Count" @bind-Value=@_adc._scale.MassCount[1]/>
+                <InputNumber id="Mass Low Value" @bind-Value=@_adc._scale.MassValue[0]/>
+                <InputNumber id="Mass High Value" @bind-Value=@_adc._scale.MassValue[1]/>
+
+                <InputNumber id="HPHR Low Count" @bind-Value=@_adc._scale.HPHRCount[0]/>
+                <InputNumber id="HPHR High Count" @bind-Value=@_adc._scale.HPHRCount[1]/>
+                <InputNumber id="HPHR Low Value" @bind-Value=@_adc._scale.HPHRValue[0]/>
+                <InputNumber id="HPHR High Value" @bind-Value=@_adc._scale.HPHRValue[1]/>
+
+                <InputNumber id="HPLR Low Count" @bind-Value=@_adc._scale.HPLRCount[0]/>
+                <InputNumber id="HPLR High Count" @bind-Value=@_adc._scale.HPLRCount[1]/>
+                <InputNumber id="HPLR Low Value" @bind-Value=@_adc._scale.HPLRValue[0]/>
+                <InputNumber id="HPLR High Value" @bind-Value=@_adc._scale.HPLRValue[1]/>
+
+                <InputNumber id="RH Low Count" @bind-Value=@_adc._scale.RHCount[0]/>
+                <InputNumber id="RH High Count" @bind-Value=@_adc._scale.RHCount[1]/>
+                <InputNumber id="RH Low Value" @bind-Value=@_adc._scale.RHValue[0]/>
+                <InputNumber id="RH High Value" @bind-Value=@_adc._scale.RHValue[1]/>
+                
+            </EditForm>
+            <button class="btn btn-primary btn-block" @onclick="@(()=>_adc._scale.StoreData())">Save Values</button>
+            <button class="btn btn-warning btn-block" @onclick="@(()=>_adc._scale.InitializeTest())">Reset</button>
+            <button class="btn btn-block" href="/">Cancel</button>
+        </div>
     </div>
 </div>
 
 
 
 @code {
-    
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        
+    }
 
 
 }
