@@ -12,31 +12,47 @@
         <ReadingsComponent />
         <div class="col-lg-8 text-center">
             <h3>Calibration Values</h3>
-            <EditForm Model="@tempScale" class="col-lg">
-                <InputNumber id="Mass Low Count" @bind-Value="massLowCount"/>
-                <InputNumber id="Mass High Count" @bind-Value="massHighCount"/>
-                <InputNumber id="Mass Low Value" @bind-Value="massLowValue"/>
-                <InputNumber id="Mass High Value" @bind-Value="massHighValue"/>
-
-                <InputNumber id="HPHR Low Count" @bind-Value="HPHRLowCount"/>
-                <InputNumber id="HPHR High Count" @bind-Value="HPHRHighCount"/>
-                <InputNumber id="HPHR Low Value" @bind-Value="HPHRLowValue"/>
-                <InputNumber id="HPHR High Value" @bind-Value="HPHRHighValue"/>
-
-                <InputNumber id="HPLR Low Count" @bind-Value="HPLRLowCount"/>
-                <InputNumber id="HPLR High Count" @bind-Value="HPLRHighCount"/>
-                <InputNumber id="HPLR Low Value" @bind-Value="HPLRLowValue"/>
-                <InputNumber id="HPLR High Value" @bind-Value="HPLRHighValue"/>
-
-                <InputNumber id="RH Low Count" @bind-Value="RHLowCount"/>
-                <InputNumber id="RH High Count" @bind-Value="RHHighCount"/>
-                <InputNumber id="RH Low Value" @bind-Value="RHLowValue"/>
-                <InputNumber id="RH High Value" @bind-Value="RHHighValue"/>
-                
+            
+            <EditForm Model="@_adc._scale" class="col-lg">
+            <table>
+                <tr>
+                    <td><label>Mass Low Count </label><InputNumber id="Mass Low Count" @bind-Value="massLowCount"/></td>
+                    <td><label>Mass High Count </label><InputNumber id="Mass High Count" @bind-Value="massHighCount"/></td>
+                </tr>
+                <tr>
+                    <td><label>Mass Low Value </label><InputNumber id="Mass Low Value" @bind-Value="massLowValue"/></td>
+                    <td><label>Mass High Value </label><InputNumber id="Mass High Value" @bind-Value="massHighValue"/></td>
+                </tr>
+                <tr>
+                    <td><label>HPHR Low Count </label><InputNumber id="HPHR Low Count" @bind-Value="HPHRLowCount"/></td>
+                    <td><label>HPHR High Count </label><InputNumber id="HPHR High Count" @bind-Value="HPHRHighCount"/></td>
+                </tr>
+                <tr>
+                    <td><label>HPHR Low Value </label><InputNumber id="HPHR Low Value" @bind-Value="HPHRLowValue"/></td>
+                    <td><label>HPHR High Value </label><InputNumber id="HPHR High Value" @bind-Value="HPHRHighValue"/></td>
+                </tr>
+                <tr>
+                    <td><label>HPLR Low Count </label><InputNumber id="HPLR Low Count" @bind-Value="HPLRLowCount"/></td>
+                    <td><label>HPLR High Count </label><InputNumber id="HPLR High Count" @bind-Value="HPLRHighCount"/></td>
+                </tr>
+                <tr>
+                    <td><label>HPLR Low Value </label><InputNumber id="HPLR Low Value" @bind-Value="HPLRLowValue"/></td>
+                    <td><label>HPLR High Value </label><InputNumber id="HPLR High Value" @bind-Value="HPLRHighValue"/></td>
+                </tr>
+                <tr>
+                    <td><label>RH Low Count </label><InputNumber id="RH Low Count" @bind-Value="RHLowCount"/></td>
+                    <td><label>RH High Count </label><InputNumber id="RH High Count" @bind-Value="RHHighCount"/></td>
+                </tr>
+                <tr>
+                    <td><label>RH Low Value </label><InputNumber id="RH Low Value" @bind-Value="RHLowValue"/></td>
+                    <td><label>RH High Value </label><InputNumber id="RH High Value" @bind-Value="RHHighValue"/></td>
+                </tr>
+            </table>
             </EditForm>
-            <button class="btn btn-primary btn-block" @onclick="@(()=>tempScale.StoreData())">Save Values</button>
-            <button class="btn btn-warning btn-block" @onclick="@(()=>tempScale.InitializeTest())">Reset</button>
-            <button class="btn btn-block" href="/">Cancel</button>
+            
+            <button class="btn btn-primary btn-block" @onclick="@(()=>_adc._scale.StoreData())">Save Values</button>
+            <button class="btn btn-warning btn-block" @onclick="@(()=>_adc._scale.InitializeTest())">Reset</button>
+            <button class="btn btn-secondary btn-block" href="/">Cancel</button>
         </div>
     </div>
 </div>
@@ -44,32 +60,79 @@
 
 
 @code {
-    private double massHighCount;
-    private double massLowCount;
-    private double massHighValue;
-    private double massLowValue;
+    private double massHighCount {
+        get { return _adc._scale.MassCount[1]; }
+        set {_adc._scale.MassCount[1] = value; }
+    }
+    private double massLowCount {
+        get { return _adc._scale.MassCount[0]; }
+        set {_adc._scale.MassCount[0] = value; }
+    }
+    
+    private double massHighValue {
+        get { return _adc._scale.MassValue[1]; }
+        set {_adc._scale.MassValue[1] = value; }
+    }
+    private double massLowValue {
+        get { return _adc._scale.MassValue[0]; }
+        set {_adc._scale.MassValue[0] = value; }
+    }
 
-    private double HPHRHighCount;
-    private double HPHRLowCount;
-    private double HPHRHighValue;
-    private double HPHRLowValue;
+    private double HPHRHighCount {
+        get { return _adc._scale.HPHRCount[1]; }
+        set {_adc._scale.HPHRCount[1] = value; }
+    }
+    private double HPHRLowCount {
+        get { return _adc._scale.HPHRCount[0]; }
+        set {_adc._scale.HPHRCount[0] = value; }
+    }
+    private double HPHRHighValue {
+        get { return _adc._scale.HPHRValue[1]; }
+        set {_adc._scale.HPHRValue[1] = value; }
+    }
+    private double HPHRLowValue {
+        get { return _adc._scale.HPHRValue[0]; }
+        set {_adc._scale.HPHRValue[0] = value; }
+    }
 
-    private double HPLRHighCount;
-    private double HPLRLowCount;
-    private double HPLRHighValue;
-    private double HPLRLowValue;
+    private double HPLRHighCount {
+        get { return _adc._scale.HPLRCount[1]; }
+        set {_adc._scale.HPLRCount[1] = value; }
+    }
+    private double HPLRLowCount {
+        get { return _adc._scale.HPLRCount[0]; }
+        set {_adc._scale.HPLRCount[0] = value; }
+    }
+    private double HPLRHighValue {
+        get { return _adc._scale.HPLRValue[1]; }
+        set {_adc._scale.HPLRValue[1] = value; }
+    }
+    private double HPLRLowValue {
+        get { return _adc._scale.HPLRValue[0]; }
+        set {_adc._scale.HPLRValue[0] = value; }
+    }
 
-    private double RHHighCount;
-    private double RHLowCount;
-    private double RHHighValue;
-    private double RHLowValue;
+    private double RHHighCount {
+        get { return _adc._scale.RHCount[1]; }
+        set {_adc._scale.RHCount[1] = value; }
+    }
+    private double RHLowCount {
+        get { return _adc._scale.RHCount[0]; }
+        set {_adc._scale.RHCount[0] = value; }
+    }
+    private double RHHighValue {
+        get { return _adc._scale.RHValue[1]; }
+        set {_adc._scale.RHValue[1] = value; }
+    }
+    private double RHLowValue {
+        get { return _adc._scale.RHValue[0]; }
+        set {_adc._scale.RHValue[0] = value; }
+    }
 
-    private ScalingVals tempScale;
+
     protected override void OnInitialized()
     {
         base.OnInitialized();
-        tempScale = _adc._scale;
-
     }
 
 

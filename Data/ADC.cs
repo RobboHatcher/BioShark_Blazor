@@ -52,7 +52,7 @@ namespace BioShark_Blazor.Data {
             _adcControl.OpenPin((int)ADCInPins.BusyPin, PinMode.Input);
             _adcControl.OpenPin((int)ADCOutPins.ResetPin, PinMode.Output);
             _adcControl.OpenPin((int)ADCOutPins.ConvertStartPin, PinMode.Output);
-            _scale.InitializeTest();
+            _scale.FetchData();
             _scale.ScaleFactorsUpdate();
             
             
@@ -63,6 +63,7 @@ namespace BioShark_Blazor.Data {
             Task.Run(() => ADCLoop());
             Task.Run(() => AverageValuesSendDataPoint());
         }
+
 
         public void InitSPI(){
             var settings = new SpiConnectionSettings(0,0){
@@ -136,6 +137,7 @@ namespace BioShark_Blazor.Data {
 
             for(int i = 0;  i < ScaledNums.Length; i++){
                 if (i < 3){
+                    // Mass, HPHR, and HPLR
                     ComputedArray[i] = (Avgs[i] - _scale.ZeroOffsets[i]) * _scale.ScaleFactors[i];
                 }
 
@@ -146,6 +148,7 @@ namespace BioShark_Blazor.Data {
                     AnalogTempResult = 1 / (0.000828083 + (0.000208691 * Math.Log(AnalogTempResult)) + 
                         (0.000000080812 * Math.Pow(Math.Log(AnalogTempResult), 3)));
                     
+                    // Kelvin to Celsius
                     ComputedArray[i] = AnalogTempResult - 273.15;
                 }
 
