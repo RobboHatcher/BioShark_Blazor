@@ -12,30 +12,30 @@
         <ReadingsComponent />
         <div class="col-lg-8 text-center">
             <h3>Calibration Values</h3>
-            <EditForm Model="@_adc._scale" class="col-lg">
-                <InputNumber id="Mass Low Count" @bind-Value=@_adc._scale.MassCount[0]/>
-                <InputNumber id="Mass High Count" @bind-Value=@_adc._scale.MassCount[1]/>
-                <InputNumber id="Mass Low Value" @bind-Value=@_adc._scale.MassValue[0]/>
-                <InputNumber id="Mass High Value" @bind-Value=@_adc._scale.MassValue[1]/>
+            <EditForm Model="@tempScale" class="col-lg">
+                <InputNumber id="Mass Low Count" @bind-Value="massLowCount"/>
+                <InputNumber id="Mass High Count" @bind-Value="massHighCount"/>
+                <InputNumber id="Mass Low Value" @bind-Value="massLowValue"/>
+                <InputNumber id="Mass High Value" @bind-Value="massHighValue"/>
 
-                <InputNumber id="HPHR Low Count" @bind-Value=@_adc._scale.HPHRCount[0]/>
-                <InputNumber id="HPHR High Count" @bind-Value=@_adc._scale.HPHRCount[1]/>
-                <InputNumber id="HPHR Low Value" @bind-Value=@_adc._scale.HPHRValue[0]/>
-                <InputNumber id="HPHR High Value" @bind-Value=@_adc._scale.HPHRValue[1]/>
+                <InputNumber id="HPHR Low Count" @bind-Value="HPHRLowCount"/>
+                <InputNumber id="HPHR High Count" @bind-Value="HPHRHighCount"/>
+                <InputNumber id="HPHR Low Value" @bind-Value="HPHRLowValue"/>
+                <InputNumber id="HPHR High Value" @bind-Value="HPHRHighValue"/>
 
-                <InputNumber id="HPLR Low Count" @bind-Value=@_adc._scale.HPLRCount[0]/>
-                <InputNumber id="HPLR High Count" @bind-Value=@_adc._scale.HPLRCount[1]/>
-                <InputNumber id="HPLR Low Value" @bind-Value=@_adc._scale.HPLRValue[0]/>
-                <InputNumber id="HPLR High Value" @bind-Value=@_adc._scale.HPLRValue[1]/>
+                <InputNumber id="HPLR Low Count" @bind-Value="HPLRLowCount"/>
+                <InputNumber id="HPLR High Count" @bind-Value="HPLRHighCount"/>
+                <InputNumber id="HPLR Low Value" @bind-Value="HPLRLowValue"/>
+                <InputNumber id="HPLR High Value" @bind-Value="HPLRHighValue"/>
 
-                <InputNumber id="RH Low Count" @bind-Value=@_adc._scale.RHCount[0]/>
-                <InputNumber id="RH High Count" @bind-Value=@_adc._scale.RHCount[1]/>
-                <InputNumber id="RH Low Value" @bind-Value=@_adc._scale.RHValue[0]/>
-                <InputNumber id="RH High Value" @bind-Value=@_adc._scale.RHValue[1]/>
+                <InputNumber id="RH Low Count" @bind-Value="RHLowCount"/>
+                <InputNumber id="RH High Count" @bind-Value="RHHighCount"/>
+                <InputNumber id="RH Low Value" @bind-Value="RHLowValue"/>
+                <InputNumber id="RH High Value" @bind-Value="RHHighValue"/>
                 
             </EditForm>
-            <button class="btn btn-primary btn-block" @onclick="@(()=>_adc._scale.StoreData())">Save Values</button>
-            <button class="btn btn-warning btn-block" @onclick="@(()=>_adc._scale.InitializeTest())">Reset</button>
+            <button class="btn btn-primary btn-block" @onclick="@(()=>tempScale.StoreData())">Save Values</button>
+            <button class="btn btn-warning btn-block" @onclick="@(()=>tempScale.InitializeTest())">Reset</button>
             <button class="btn btn-block" href="/">Cancel</button>
         </div>
     </div>
@@ -44,12 +44,36 @@
 
 
 @code {
+    private double massHighCount;
+    private double massLowCount;
+    private double massHighValue;
+    private double massLowValue;
 
+    private double HPHRHighCount;
+    private double HPHRLowCount;
+    private double HPHRHighValue;
+    private double HPHRLowValue;
+
+    private double HPLRHighCount;
+    private double HPLRLowCount;
+    private double HPLRHighValue;
+    private double HPLRLowValue;
+
+    private double RHHighCount;
+    private double RHLowCount;
+    private double RHHighValue;
+    private double RHLowValue;
+
+    private ScalingVals tempScale;
     protected override void OnInitialized()
     {
         base.OnInitialized();
-        
+        tempScale = _adc._scale;
+
     }
+
+
+
 
 
 }
