@@ -71,9 +71,10 @@ namespace BioShark_Blazor.Data {
         }
 
         public async Task FillTank(){
-            await _controller.WaitForEventAsync(4, PinEventTypes.Rising, TimeSpan.FromMinutes(1));
+            await _controller.WaitForEventAsync(4, PinEventTypes.Rising, TimeSpan.FromMinutes(Constants.FillPumpCancellationTimer));
+            Console.WriteLine("Fill complete, or two minutes have passed.")
         }
-        
+
         public void TurnOn (int sensorPin) {
             if (sensorPin == inputMisterLevel)
                 return;

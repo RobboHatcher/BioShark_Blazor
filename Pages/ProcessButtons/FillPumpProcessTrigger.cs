@@ -8,8 +8,6 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
 
         private bool isRunning = false;
         private Machine machine;
-        
-        public event Running FillPumpRun;
 
         public FillPumpProcessTrigger(Machine _machine){
             machine = _machine;
