@@ -90,9 +90,10 @@
         ProcessButtons = new List<IProcessButton>();
         ProcessButtons.Add(new RunPumpAutoTrigger(_machine));
         ProcessButtons.Add(new LROscillatorTrigger(_machine));
-        ProcessButtons.Add(new DrainPumpAutoTrigger(_machine));
+        ProcessButtons.Add(new DrainPumpAutoTrigger(_machine, _adc));
         ProcessButtons.Add(new AutoCycleProcessTrigger(_machine));
-
+        
+        ((DrainPumpAutoTrigger)ProcessButtons[2]).DrainRunChange += UpdateButtonStyles;
         UpdateButtonStyles();
         
         

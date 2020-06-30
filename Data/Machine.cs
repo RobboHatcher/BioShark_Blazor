@@ -60,7 +60,7 @@ namespace BioShark_Blazor.Data {
             }
         }
 
-        // By default, OpenPin will open out.
+        // By default, OpenPin will open off.
         private void OpenOutPinToOffState (int sensorPin) {
             if (!_controller.IsPinOpen (sensorPin)) {
                 _controller.OpenPin (sensorPin, PinMode.Output);
@@ -77,6 +77,7 @@ namespace BioShark_Blazor.Data {
                 _controller.Write (sensorPin, PinValue.Low);
             }
             _sensors[GetSensorPinIndex (sensorPin)].TurnOn ();
+            Console.WriteLine("Turn on: " + Enum.GetName(typeof(OutputPins),(int) sensorPin));
 
         }
 
@@ -89,6 +90,8 @@ namespace BioShark_Blazor.Data {
                 _controller.Write (sensorPin, PinValue.High);
             }
             _sensors[GetSensorPinIndex (sensorPin)].TurnOff ();
+
+            Console.WriteLine("Turn off: " + Enum.GetName(typeof(OutputPins),(int) sensorPin));
         }
 
         public bool IsOn (int sensorPin) {

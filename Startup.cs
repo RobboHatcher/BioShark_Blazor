@@ -30,7 +30,6 @@ namespace BioShark_Blazor
         {
             services.AddRazorPages();
             services.AddServerSideBlazor();
-            services.AddSingleton<WeatherForecastService>();
             services.AddSingleton<Machine>();
             services.AddSingleton<ADC>();
         }

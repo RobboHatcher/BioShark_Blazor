@@ -76,16 +76,35 @@ namespace BioShark_Blazor.Data {
         public void StoreData()
         {
             XmlSerializer ser = new XmlSerializer(typeof(ScalingVals));
-            TextWriter writer = new StreamWriter("~/BioShark Data/Calibration.xml");
+            TextWriter writer = new StreamWriter(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)+"/BioShark Data/Configuration.xml");
             ser.Serialize(writer, this);
             writer.Close();
         }
 
-        public static ScalingVals FetchData()
+        public void FetchData()
         {
-            return new ScalingVals();
+            XmlSerializer ser = new XmlSerializer(typeof(ScalingVals));
+            try
+            {
+                FileStream fs = new FileStream(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)+"/BioShark Data/Configuration.xml", FileMode.OpenOrCreate);
+                ScalingVals vals = (ScalingVals)(ser.Deserialize(fs));
+
+                this.MassCount = vals.MassCount;
+                this.MassValue = vals.MassValue;
+                this.HPHRCount = vals.HPHRCount;
+                this.HPHRValue = vals.HPHRValue;
+                this.HPLRCount = vals.HPLRCount;
+                this.HPLRValue = vals.HPLRValue;
+                this.RHCount = vals.RHCount;
+                this.RHValue = vals.RHValue;
+
+            }
+
+            catch(Exception ex)
+            {
+                Console.WriteLine("No initial file found.");
+                InitializeTest();
+            }
         }
-
     }
-
 }

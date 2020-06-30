@@ -10,7 +10,6 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
 
 
         public RunPumpAutoTrigger(Machine _machine){
-
             machine = _machine;
         }
 
@@ -35,6 +34,9 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
             else
                 return "btn btn-success btn-block";
         }
+
+        
+    
 
 
     }
