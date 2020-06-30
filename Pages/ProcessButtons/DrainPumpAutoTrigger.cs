@@ -54,8 +54,6 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
             bool empty = false;
             // Drain until the mass value is fairly constant
             // Tolerance: must be within the same mass for 3 seconds
-            
-            
             prevMassReading = currMassReading;
             Thread.Sleep(1000);
             currMassReading = adc.ScaledNums[(int)ADC.ReadingTypes.Mass];

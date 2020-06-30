@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Device.Gpio;
 using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace BioShark_Blazor.Data {
 
@@ -14,7 +16,7 @@ namespace BioShark_Blazor.Data {
             HRCat = 21, Sidekick = 26 , Drainpump = 27,
         }
 
-        int inputMisterLevel = 4; // Mister level sensor: active low
+        public static int inputMisterLevel = 4; // Mister level sensor: active low
 
         public int TestPin = 24;
         public int VerifyNum = 0;
@@ -68,6 +70,10 @@ namespace BioShark_Blazor.Data {
             }
         }
 
+        public async Task FillTank(){
+            await _controller.WaitForEventAsync(4, PinEventTypes.Rising, TimeSpan.FromMinutes(1));
+        }
+        
         public void TurnOn (int sensorPin) {
             if (sensorPin == inputMisterLevel)
                 return;
@@ -78,7 +84,6 @@ namespace BioShark_Blazor.Data {
             }
             _sensors[GetSensorPinIndex (sensorPin)].TurnOn ();
             Console.WriteLine("Turn on: " + Enum.GetName(typeof(OutputPins),(int) sensorPin));
-
         }
 
         public void TurnOff (int sensorPin) {
@@ -97,7 +102,9 @@ namespace BioShark_Blazor.Data {
         public bool IsOn (int sensorPin) {
             return _sensors[GetSensorPinIndex (sensorPin)].IsOn ();
         }
-
+        public bool IsLevelSensorOn(){
+            return _controller.Read(inputMisterLevel) == PinValue.Low;
+        }
         private int GetSensorPinIndex (int PinNum) {
             return _sensors.IndexOf (_sensors.Find (pin => pin.PinNum == PinNum));
         }
@@ -125,6 +132,7 @@ namespace BioShark_Blazor.Data {
             return On;
         }
 
+        
     }
 
 }

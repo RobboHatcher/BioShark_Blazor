@@ -59,8 +59,9 @@
                 <tr style="padding:10px"><button class="@processButtonStyle[0]" @onclick="@(()=>ProcessToggle(0))">Run Pump w/ Auto-Off</button></tr>
                 <tr style="padding:10px"><button class="@processButtonStyle[1]" @onclick="@(()=>ProcessToggle(1))">LR Oscillator</button></tr>
                 <tr style="padding:10px"><button class="@processButtonStyle[2]" @onclick="@(()=>ProcessToggle(2))">Drain Pump w/ Auto-Off</button></tr>
+                <tr style="padding:10px"><button class="@processButtonStyle[3]" @onclick="@(()=>ProcessToggle(3))">Fill Pump</button></tr>
                 <br/>
-                <tr style="padding:10px"><button class="@processButtonStyle[3]" @onclick="@(()=>ProcessToggle(3))">Auto Cycle</button></tr>
+                <tr style="padding:10px"><button class="@processButtonStyle[4]" @onclick="@(()=>ProcessToggle(4))">Auto Cycle</button></tr>
                 <tr style="padding:10px"><button class="btn btn-info btn-block">Early Stop Cycle</button></tr>
                 <tr style="padding:10px"><button class="btn btn-danger btn-block">Emergency Stop Cycle</button></tr>
                 
@@ -91,6 +92,7 @@
         ProcessButtons.Add(new RunPumpAutoTrigger(_machine));
         ProcessButtons.Add(new LROscillatorTrigger(_machine));
         ProcessButtons.Add(new DrainPumpAutoTrigger(_machine, _adc));
+        ProcessButtons.Add(new FillPumpProcessTrigger(_machine));
         ProcessButtons.Add(new AutoCycleProcessTrigger(_machine));
         
         ((DrainPumpAutoTrigger)ProcessButtons[2]).DrainRunChange += UpdateButtonStyles;
