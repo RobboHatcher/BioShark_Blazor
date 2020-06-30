@@ -16,7 +16,7 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
         private double currMassReading = 0;
 
         
-        public DrainPumpAutoTrigger(ref Machine _machine, ADC _adc) {
+        public DrainPumpAutoTrigger(Machine _machine, ADC _adc) {
             machine = _machine;
             adc = _adc;
         }
