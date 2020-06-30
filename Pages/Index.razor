@@ -83,10 +83,7 @@
         base.OnInitialized();
         systemButtonStyle = new Dictionary<int,string>();
         processButtonStyle = new List<string>();
-        for(int i =0; i < 4; i++)
-        {
-            processButtonStyle.Add("btn btn-primary btn-block");
-        }
+        
 
         ProcessButtons = new List<IProcessButton>();
         ProcessButtons.Add(new RunPumpAutoTrigger(_machine));
@@ -94,7 +91,10 @@
         ProcessButtons.Add(new DrainPumpAutoTrigger(_machine, _adc));
         ProcessButtons.Add(new FillPumpProcessTrigger(_machine));
         ProcessButtons.Add(new AutoCycleProcessTrigger(_machine));
-        
+        for(int i =0; i < ProcessButtons.Count ; i++)
+        {
+            processButtonStyle.Add("btn btn-primary btn-block");
+        }
         ((DrainPumpAutoTrigger)ProcessButtons[2]).DrainRunChange += UpdateButtonStyles;
         UpdateButtonStyles();
         
@@ -140,7 +140,7 @@
             else systemButtonStyle[val] = "btn btn-primary btn-block";
         }
     
-        for(int i = 0; i < 4; i++)
+        for(int i = 0; i < ProcessButtons.Count ; i++)
         {
             processButtonStyle[i] = ProcessButtons[i].GetButtonClass();
         }
