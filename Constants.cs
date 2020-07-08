@@ -7,6 +7,9 @@ namespace BioShark_Blazor{
         //Time in minutes before fill pump stops attempting tofill the reservoir
         public const int FillPumpCancellationTimer = 2;
 
+        // Maximum Mass that can go into the mister
+        public const int MisterMax = 1500;
+
     }
 
 }

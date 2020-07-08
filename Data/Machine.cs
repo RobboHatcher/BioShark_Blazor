@@ -9,6 +9,9 @@ namespace BioShark_Blazor.Data {
 
     public class Machine {
 
+        CancellationTokenSource source = new CancellationTokenSource();
+        CancellationToken token;
+
         // EDIT THIS TO CHANGE PIN NUMS
         public enum OutputPins {
             Cat = 5, Heat = 6, Blower = 12, LRCat = 13,
@@ -28,7 +31,7 @@ namespace BioShark_Blazor.Data {
 
         public Machine () {
 
-
+            token = source.Token;
             Random rand = new Random (DateTime.Now.Millisecond);
             VerifyNum = rand.Next (0, 100);
             Console.WriteLine (VerifyNum);
@@ -71,7 +74,7 @@ namespace BioShark_Blazor.Data {
         }
 
         public async Task FillTank(){
-            await _controller.WaitForEventAsync(4, PinEventTypes.Rising, TimeSpan.FromMinutes(Constants.FillPumpCancellationTimer));
+            await _controller.WaitForEventAsync(4, PinEventTypes.Falling, token);
             Console.WriteLine("Fill complete, or two minutes have passed.");
         }
 
