@@ -4,10 +4,15 @@ using System.Threading.Tasks;
 namespace BioShark_Blazor.Pages.ProcessButtons {
 
  
-    public class FillPumpProcessTrigger : IProcessButton {
+    
 
+    public class FillPumpProcessTrigger : IProcessButton {
+        //private delegate MassNotifier;
         private bool isRunning = false;
         private Machine machine;
+        
+
+        //public event MassNotifier notifier;
 
         public FillPumpProcessTrigger(Machine _machine){
             machine = _machine;
@@ -15,9 +20,12 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
 
 
         public async void StartProcess(){
+            
             isRunning = true;
             machine.TurnOn((int)Machine.OutputPins.FillPump);
+            //notifier?.Invoke();
             await machine.FillTank();
+
             EndProcess();
         }
 

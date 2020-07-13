@@ -34,7 +34,7 @@ namespace BioShark_Blazor.Data {
         public ScalingVals _scale {get;set;} = new ScalingVals();
         public List<ADCPin> _inputs;
         public List<ADCPin> _outputs;  
-
+        public double MassStart, MassFilled = 0;
         public bool busyReading = false;
         public bool busyAveraging = false;
         public bool busyCalibrating = false;
@@ -62,6 +62,7 @@ namespace BioShark_Blazor.Data {
             ADCReset();
             Task.Run(() => ADCLoop());
             Task.Run(() => AverageValuesSendDataPoint());
+
         }
 
 
@@ -127,6 +128,7 @@ namespace BioShark_Blazor.Data {
                 while(busyCalibrating) {}
 
                 ScaledNums = ComputeScaledValues();
+                
             }
         }
         
