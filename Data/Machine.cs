@@ -77,7 +77,11 @@ namespace BioShark_Blazor.Data {
             await _controller.WaitForEventAsync(4, PinEventTypes.Falling, token);
             Console.WriteLine("Fill complete, or two minutes have passed.");
         }
-
+        public void TurnAllOff(){
+            foreach(var sensor in _sensors){
+                TurnOff(sensor.PinNum);
+            }
+        }
         public void TurnOn (int sensorPin) {
             if (sensorPin == inputMisterLevel)
                 return;

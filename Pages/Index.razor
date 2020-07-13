@@ -63,7 +63,7 @@
                 <br/>
                 <tr style="padding:10px"><button class="@processButtonStyle[4]" @onclick="@(()=>ProcessToggle(4))">Auto Cycle</button></tr>
                 <tr style="padding:10px"><button class="btn btn-info btn-block">Early Stop Cycle</button></tr>
-                <tr style="padding:10px"><button class="btn btn-danger btn-block">Emergency Stop Cycle</button></tr>
+                <tr style="padding:10px"><button class="btn btn-danger btn-block" @onclick="@(()=>EmergencyStop())">Emergency Stop Cycle</button></tr>
                 
              </table>
         </div>
@@ -128,6 +128,17 @@
         }
         else ProcessButtons[i].EndProcess();
         UpdateButtonStyles();
+    }
+
+
+    private void EmergencyStop()
+    {
+        // Stop all processes
+        foreach(var button in ProcessButtons)
+        {
+            button.EndProcess();
+        }
+        _machine.TurnAllOff();
     }
 
     private void UpdateButtonStyles()
