@@ -12,23 +12,26 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
         private bool isRunning = false;
         private Machine machine;
         private ADC adc;
-        private double prevMassReading = 0;
+        private double prevMassAvg;
+        private double currMassAvg;
         private double currMassReading = 0;
+
+        private double[] drainReadings =  {0,0,0,0,0,0}; // Drain rolling average
 
         
         public DrainPumpAutoTrigger(Machine _machine, ADC _adc) {
             machine = _machine;
             adc = _adc;
         }
-
+    
         public void StartProcess(){
             if(!isRunning){
                 isRunning = true;
+                drainReadings = new double[6]{0,0,0,0,0,0};
                 machine.TurnOn((int)Machine.OutputPins.Drainpump);
                 DrainRunChange?.Invoke();
                 Task.Run(() => { 
                     while(!isTankEmpty() && isRunning) {}
-                    
                 });
             }
         
@@ -57,13 +60,31 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
 
         private bool isTankEmpty() {
             bool empty = false;
-            // Drain until the mass value is fairly constant
-            // Tolerance: must be within the same mass for 3 seconds
-            prevMassReading = currMassReading;
-            Thread.Sleep(1000);
             currMassReading = adc.ScaledNums[(int)ADC.ReadingTypes.Mass];
-            Console.WriteLine(currMassReading + ", " + prevMassReading);
-            if(Math.Abs(currMassReading - prevMassReading) <= Constants.DrainToleranceVal){
+            // Drain until the mass value is fairly constant
+            // Tolerance: average value must not change by more than 1 gram
+
+            for(int i = drainReadings.Length - 1; i > 0; i--)
+            {
+                drainReadings[i] = drainReadings[i-1];
+            }
+
+            drainReadings[0] = currMassReading;
+            
+            prevMassAvg = currMassAvg;
+            currMassAvg = 0;
+
+            for(int i =0; i < drainReadings.Length; i++)
+            {
+                currMassAvg += drainReadings[i];
+            }
+
+            currMassAvg /= drainReadings.Length;
+
+            Thread.Sleep(1000);
+            
+            Console.WriteLine(prevMassAvg + ", " + currMassAvg);
+            if(Math.Abs(currMassAvg - prevMassAvg) <= Constants.DrainToleranceVal){
                 EndProcess();
                 return true;
             }

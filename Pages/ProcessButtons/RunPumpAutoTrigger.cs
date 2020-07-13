@@ -3,7 +3,6 @@ using BioShark_Blazor.Data;
 
 namespace BioShark_Blazor.Pages.ProcessButtons {
 
- 
     public class RunPumpAutoTrigger : IProcessButton {
 
         private bool isRunning = false;
@@ -19,6 +18,8 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
         public void StartProcess(){
             isRunning = true;
             machine.TurnOn((int)Machine.OutputPins.RunPump);
+            // Loop; until turned off, keep run pump on
+
         }
 
         public void EndProcess(){
