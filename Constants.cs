@@ -10,6 +10,12 @@ namespace BioShark_Blazor{
         // Maximum Mass that can go into the mister
         public const int MisterMax = 1500;
 
+        // Amount of time the sidekick runs before starting the cycle
+        public const int SidekickMS = 120000;
+
+        // PPM target for h2O2
+        public const int TargetAmt = 200;
+
     }
 
 }

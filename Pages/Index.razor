@@ -90,7 +90,7 @@
         ProcessButtons.Add(new LROscillatorTrigger(_machine));
         ProcessButtons.Add(new DrainPumpAutoTrigger(_machine, _adc));
         ProcessButtons.Add(new FillPumpProcessTrigger(_machine));
-        ProcessButtons.Add(new AutoCycleProcessTrigger(_machine));
+        ProcessButtons.Add(new AutoCycleProcessTrigger(_machine, _adc, ProcessButtons));
         for(int i =0; i < ProcessButtons.Count ; i++)
         {
             processButtonStyle.Add("btn btn-primary btn-block");
