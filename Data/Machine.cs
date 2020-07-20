@@ -23,6 +23,7 @@ namespace BioShark_Blazor.Data {
 
         public int TestPin = 24;
         public int VerifyNum = 0;
+        public event Action FillSensorSwitch;
 
         private GpioController _controller { get; set; }
         private List<Sensor> _sensors;
@@ -73,8 +74,12 @@ namespace BioShark_Blazor.Data {
             }
         }
 
+        // Invokes the Tank filled event.
         public async Task FillTank(){
+            Console.WriteLine("Filling Tank. Sensor reading currently " + _controller.Read(4));
             await _controller.WaitForEventAsync(4, PinEventTypes.Falling, token);
+            Console.WriteLine("Tank Filled.");
+            FillSensorSwitch?.Invoke();
             Console.WriteLine("Fill complete, or two minutes have passed.");
         }
         public void TurnAllOff(){

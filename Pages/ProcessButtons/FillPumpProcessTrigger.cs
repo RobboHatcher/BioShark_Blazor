@@ -1,5 +1,6 @@
 using BioShark_Blazor.Data;
 using System.Threading.Tasks;
+using System;
 
 namespace BioShark_Blazor.Pages.ProcessButtons {
 
@@ -16,23 +17,29 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
 
         public FillPumpProcessTrigger(Machine _machine){
             machine = _machine;
+
         }
 
 
         public async void StartProcess(){
             
-            isRunning = true;
-            machine.TurnOn((int)Machine.OutputPins.FillPump);
-            //notifier?.Invoke();
-            await machine.FillTank();
-
-            EndProcess();
+            // Don't start if we are already full
+            
+            if(!machine.isLevelSensorOn())
+            {
+                isRunning = true;
+                
+                machine.TurnOn((int)Machine.OutputPins.FillPump);
+                machine.FillSensorSwitch += EndProcess;
+                await machine.FillTank();
+            }
         }
 
         public void EndProcess(){
             isRunning = false;
             machine.TurnOff((int)Machine.OutputPins.FillPump);
         }
+
 
         public bool GetProcessState(){
             return isRunning;
