@@ -74,7 +74,7 @@ namespace BioShark_Blazor.Data {
         }
 
         public async Task FillTank(){
-            await _controller.WaitForEventAsync(4, PinEventTypes.Falling, token);
+            if(_controller.Read(4) == PinValue.High){ await _controller.WaitForEventAsync(4, PinEventTypes.Falling, token);}
             Console.WriteLine("Fill complete, or two minutes have passed.");
         }
         public void TurnAllOff(){
