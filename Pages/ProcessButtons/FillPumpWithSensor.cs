@@ -7,7 +7,7 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
  
     
 
-    public class FillPumpProcessTrigger : IProcessButton {
+    public class FillPumpWithSensor : IProcessButton {
         //private delegate MassNotifier;
         private bool isRunning = false;
         private Machine machine;
@@ -15,7 +15,7 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
 
         //public event MassNotifier notifier;
 
-        public FillPumpProcessTrigger(Machine _machine){
+        public FillPumpWithSensor(Machine _machine){
             machine = _machine;
 
         }

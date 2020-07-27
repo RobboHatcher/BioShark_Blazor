@@ -56,10 +56,10 @@
         <div class="col-lg-4 text-center">
             <h3>Automatic Procedures</h3>
              <table class="col-lg">
-                <tr style="padding:10px"><button class="@processButtonStyle[0]" @onclick="@(()=>ProcessToggle(0))">Run Pump w/ Auto-Off</button></tr>
-                <tr style="padding:10px"><button class="@processButtonStyle[1]" @onclick="@(()=>ProcessToggle(1))">LR Oscillator</button></tr>
-                <tr style="padding:10px"><button class="@processButtonStyle[2]" @onclick="@(()=>ProcessToggle(2))">Drain Pump w/ Auto-Off</button></tr>
-                <tr style="padding:10px"><button class="@processButtonStyle[3]" @onclick="@(()=>ProcessToggle(3))">Fill Pump</button></tr>
+                <tr style="padding:10px"><button class="@processButtonStyle[(int)ButtonTypes.runPumpButton]" @onclick="@(()=>ProcessToggle(0))">Run Pump w/ Auto-Off</button></tr>
+                <tr style="padding:10px"><button class="@processButtonStyle[(int)ButtonTypes.LROButton]" @onclick="@(()=>ProcessToggle(1))">LR Oscillator</button></tr>
+                <tr style="padding:10px"><button class="@processButtonStyle[(int)ButtonTypes.DrainButton]" @onclick="@(()=>ProcessToggle(2))">Drain Pump w/ Auto-Off</button></tr>
+                <tr style="padding:10px"><button class="@processButtonStyle[(int)ButtonTypes.FillButton]" @onclick="@(()=>ProcessToggle(3))">Fill Pump</button></tr>
                 <br/>
                 <tr style="padding:10px"><button class="@processButtonStyle[4]" @onclick="@(()=>ProcessToggle(4))">Auto Cycle</button></tr>
                 <tr style="padding:10px"><button class="btn btn-info btn-block">Early Stop Cycle</button></tr>
@@ -71,13 +71,15 @@
 </div>
 
 @code{
+
+
     private Dictionary<int,string> systemButtonStyle;
 
     private List<string> processButtonStyle;
 
     private List<IProcessButton> ProcessButtons;
 
-
+    private enum ButtonTypes {runPumpButton,LROButton,DrainButton,FillButton,AutoCycle}
     protected override void OnInitialized()
     {
         base.OnInitialized();
@@ -87,15 +89,15 @@
 
         ProcessButtons = new List<IProcessButton>();
         ProcessButtons.Add(new RunPumpAutoTrigger(_machine));
-        ProcessButtons.Add(new LROscillatorTrigger(_machine));
-        ProcessButtons.Add(new DrainPumpAutoTrigger(_machine, _adc));
-        ProcessButtons.Add(new FillPumpProcessTrigger(_machine));
-        ProcessButtons.Add(new AutoCycleProcessTrigger(_machine, _adc, ProcessButtons));
+        ProcessButtons.Add(new LROscillator(_machine));
+        ProcessButtons.Add(new DrainPump(_machine, _adc));
+        ProcessButtons.Add(new FillPumpWithSensor(_machine));
+        ProcessButtons.Add(new AutoCycle(_machine, _adc, ProcessButtons));
         for(int i =0; i < ProcessButtons.Count ; i++)
         {
             processButtonStyle.Add("btn btn-primary btn-block");
         }
-        ((DrainPumpAutoTrigger)ProcessButtons[2]).DrainRunChange += UpdateButtonStyles;
+        ((DrainPump)ProcessButtons[2]).DrainRunChange += UpdateButtonStyles;
         UpdateButtonStyles();
         
         //ProcessButtons[3].notifier += _adc.MassDiffForFill;

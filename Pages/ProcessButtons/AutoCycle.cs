@@ -7,17 +7,17 @@ using System.Threading.Tasks;
 
 namespace BioShark_Blazor.Pages.ProcessButtons {
 
-    public class AutoCycleProcessTrigger : IProcessButton {
+    public class AutoCycle : IProcessButton {
 
         public enum CycleButtons {RunPump, LROsc, DrainPump, FillPump}
         private bool isRunning = false;
         private Machine machine;
         private ADC adc;
         private CycleData _data;
-        private Timer PreCycleSideKick;
+        private System.Timers.Timer PreCycleSideKick;
         private List<IProcessButton> buttons;
 
-        public AutoCycleProcessTrigger(Machine _machine, ADC _adc, List<IProcessButton> _buttons) {
+        public AutoCycle(Machine _machine, ADC _adc, List<IProcessButton> _buttons) {
             machine = _machine;
             adc = _adc;
             buttons = _buttons;
@@ -31,6 +31,8 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
                 
             }
             isRunning = false;
+            machine.TurnAllOff();
+            machine.TurnOn((int)Machine.OutputPins.LRCat);
         }
 
         public string GetButtonClass(){
