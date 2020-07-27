@@ -24,8 +24,8 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
         public async void StartProcess(){
             
             // Don't start if we are already full
-            
-            if(!machine.isLevelSensorOn())
+
+            if(!machine.IsLevelSensorOn())
             {
                 isRunning = true;
                 
@@ -38,6 +38,7 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
         public void EndProcess(){
             isRunning = false;
             machine.TurnOff((int)Machine.OutputPins.FillPump);
+            machine.FillSensorSwitch -= EndProcess;
         }
 
 

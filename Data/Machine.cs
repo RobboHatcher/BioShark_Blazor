@@ -82,6 +82,14 @@ namespace BioShark_Blazor.Data {
             FillSensorSwitch?.Invoke();
             Console.WriteLine("Fill complete, or two minutes have passed.");
         }
+
+        public async Task DrainedTank(){
+            Console.WriteLine("In discharge; using run pump to refill");
+            await _controller.WaitForEventAsync(4, PinEventTypes.Rising, token);
+            Console.WriteLine("Tank losing mass.");
+            Console.WriteLine("");
+        }
+        
         public void TurnAllOff(){
             foreach(var sensor in _sensors){
                 TurnOff(sensor.PinNum);

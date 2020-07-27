@@ -1,6 +1,8 @@
 using BioShark_Blazor.Data;
 using System.Threading.Tasks;
 using System.Threading;
+using System;
+using System.ComponentModel;
 
 namespace BioShark_Blazor.Pages.ProcessButtons {
 
@@ -10,7 +12,15 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
         private bool DischargeComplete = false;
         private Machine machine;
         
-        public event Running RunPumpRunChange;
+        public bool IsInDischarge{
+            set{
+                IsInDischarge = value;
+                if(!value)
+                    RunPumpRunChange?.Invoke();
+            }
+        }
+
+        public event Action RunPumpRunChange;
 
         public RunPumpAutoTrigger(Machine _machine){
             machine = _machine;
@@ -23,20 +33,28 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
             machine.TurnOn((int)Machine.OutputPins.Blower);
             machine.TurnOn((int)Machine.OutputPins.Heat);
             machine.TurnOn((int)Machine.OutputPins.Distribution);
-            Task.Run(async () => {
-                while(!DischargeComplete){
-                    machine.TurnOn((int)Machine.OutputPins.RunPump);
-                    await machine.FillTank();
-                    machine.TurnOff((int)Machine.OutputPins.RunPump);
-                    Thread.Sleep(1000);
-                }
-            });
+            RunPumpRunChange += EndProcess;
+            machine.FillSensorSwitch += RunPumpAlgorithm;
+            Task.Run(async() => { RunPumpAlgorithm();});
 
             // Loop; until turned off, keep run pump on
         }
 
+        private void RunPumpAlgorithm(){
+            machine.TurnOff((int)Machine.OutputPins.RunPump);
+            Task.Run(async () => {await machine.DrainedTank(); }).Wait();
+            machine.TurnOn((int)Machine.OutputPins.RunPump); 
+            Task.Run(async() => {await machine.FillTank();}).Wait();
+        }
+
         public void EndProcess(){
             isRunning = false;
+            machine.TurnOff((int)Machine.OutputPins.Mist);
+            machine.TurnOff((int)Machine.OutputPins.Blower);
+            machine.TurnOff((int)Machine.OutputPins.Heat);
+            machine.TurnOff((int)Machine.OutputPins.Distribution);
+            machine.FillSensorSwitch -= RunPumpAlgorithm;
+            RunPumpRunChange -= EndProcess;
             machine.TurnOff((int)Machine.OutputPins.RunPump);
         }
 

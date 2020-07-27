@@ -14,7 +14,7 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
         private Machine machine;
         private ADC adc;
         private CycleData _data;
-        private Timer PreCycleSideKick;
+        private System.Timers.Timer PreCycleSideKick;
         private List<IProcessButton> buttons;
 
         public AutoCycleProcessTrigger(Machine _machine, ADC _adc, List<IProcessButton> _buttons) {
