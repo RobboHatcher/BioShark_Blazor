@@ -7,7 +7,7 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
 
     public delegate void Running();
     
-    public class DrainPumpAutoTrigger : IProcessButton {
+    public class DrainPump : IProcessButton {
         public event Running DrainRunChange;
         private bool isRunning = false;
         private Machine machine;
@@ -19,7 +19,7 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
         private double[] drainReadings =  {0,0,0,0,0,0}; // Drain rolling average
 
         
-        public DrainPumpAutoTrigger(Machine _machine, ADC _adc) {
+        public DrainPump(Machine _machine, ADC _adc) {
             machine = _machine;
             adc = _adc;
         }

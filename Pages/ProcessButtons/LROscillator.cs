@@ -1,12 +1,12 @@
 using BioShark_Blazor.Data;
 namespace BioShark_Blazor.Pages.ProcessButtons {
 
-    public class LROscillatorTrigger : IProcessButton {
+    public class LROscillator : IProcessButton {
 
         private bool isRunning = false;
         private Machine machine;
 
-        public LROscillatorTrigger(Machine _machine) {
+        public LROscillator(Machine _machine) {
             machine = _machine;
         }
 
