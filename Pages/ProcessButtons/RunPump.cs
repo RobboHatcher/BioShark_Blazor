@@ -10,7 +10,7 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
 
         private bool isRunning = false;
         private bool DischargeComplete = false;
-        private Machine machine;
+        private Machine machine; 
         
         public bool IsInDischarge{
             set{
@@ -33,18 +33,32 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
             machine.TurnOn((int)Machine.OutputPins.Blower);
             machine.TurnOn((int)Machine.OutputPins.Heat);
             machine.TurnOn((int)Machine.OutputPins.Distribution);
+            machine.TurnOn((int)Machine.OutputPins.MistFan);
             RunPumpRunChange += EndProcess;
             machine.FillSensorSwitch += RunPumpAlgorithm;
-            Task.Run(async() => { RunPumpAlgorithm();});
+            Task.Run(() => { RunPumpAlgorithm();});
 
             // Loop; until turned off, keep run pump on
         }
 
         private void RunPumpAlgorithm(){
-            machine.TurnOff((int)Machine.OutputPins.RunPump);
-            Task.Run(async () => {await machine.DrainedTank(); }).Wait();
-            machine.TurnOn((int)Machine.OutputPins.RunPump); 
-            Task.Run(async() => {await machine.FillTank();}).Wait();
+            machine.TurnOn((int)Machine.OutputPins.RunPump);
+            while(isRunning){
+                if(machine.IsLevelSensorOn()){
+                    Thread.Sleep(100);
+                    if(machine.IsLevelSensorOn()){
+                        machine.TurnOff((int)Machine.OutputPins.RunPump);
+                    }
+                }
+                
+                else 
+                {
+                    if(!machine.IsOn((int)Machine.OutputPins.RunPump)){
+                        machine.TurnOn((int)Machine.OutputPins.RunPump);
+                    }
+                }
+
+            }
         }
 
         public void EndProcess(){

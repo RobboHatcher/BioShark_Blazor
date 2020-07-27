@@ -14,6 +14,8 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
         private Machine machine;
         private ADC adc;
         private CycleData _data;
+        private double MassDischarged = 0, StartMass = 0;
+        private DateTime cycleStart;
         private System.Timers.Timer PreCycleSideKick;
         private List<IProcessButton> buttons;
 
@@ -47,6 +49,7 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
         public void StartProcess(){
             isRunning = true;
             machine.TurnOn((int)Machine.OutputPins.LRCat);
+            cycleStart = DateTime.Now;
             _data = new CycleData();
             RunCycle();
         }
@@ -61,6 +64,8 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
         }
 
         private async void FillMister(object source, ElapsedEventArgs e){
+
+            Console.WriteLine("Filling...");
             machine.TurnOff((int)Machine.OutputPins.Sidekick);
             buttons[(int)CycleButtons.FillPump].StartProcess();
             // For now, wait
@@ -70,19 +75,43 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
                      Thread.Sleep(1000);
                 }
             }); // While is running, check once per second to see if it stops.
-
+            StartMass = adc.ScaledNums[(int)ADC.ReadingTypes.Mass];
             StartDischarge();
-
+            // wait until the ppm is at the desired point
         }
 
         private async void StartDischarge(){
+            Console.WriteLine("Discharging...");
+            double TargetMass = Constants.TestingTargetMass;
+
             buttons[(int)CycleButtons.RunPump].StartProcess();
             await Task.Run(()=> { 
-                while(buttons[(int)CycleButtons.FillPump].GetProcessState())
-                {
-                     Thread.Sleep(1000);
+                while(MassDischarged < TargetMass){
+                    MassDischarged = StartMass - adc.ScaledNums[(int)ADC.ReadingTypes.Mass];
+                    Thread.Sleep(500);
+                } // Wait until mass above target
+                while(MassDischarged >= TargetMass){
+                    if(adc.ScaledNums[(int)ADC.ReadingTypes.HPHR] > Constants.TargetAmt)
+                    {
+                        Console.WriteLine("PPM Target Reached");
+                        buttons[(int)CycleButtons.RunPump].EndProcess();
+                        StartHold();
+                    }
+                    else if(MassDischarged > TargetMass * Constants.ExtraMassFactor){
+                        EndProcess();
+                    }
                 }
+
             });
+        }
+
+
+        private void StartHold(){
+            Console.WriteLine("Hold Step: " + DateTime.Now);
+            machine.TurnOn((int)Machine.OutputPins.Distribution);
+            buttons[(int)CycleButtons.DrainPump].StartProcess();
+
+
         }
         
     

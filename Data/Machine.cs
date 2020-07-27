@@ -89,7 +89,7 @@ namespace BioShark_Blazor.Data {
             Console.WriteLine("Tank losing mass.");
             Console.WriteLine("");
         }
-        
+
         public void TurnAllOff(){
             foreach(var sensor in _sensors){
                 TurnOff(sensor.PinNum);
@@ -123,6 +123,8 @@ namespace BioShark_Blazor.Data {
         public bool IsOn (int sensorPin) {
             return _sensors[GetSensorPinIndex (sensorPin)].IsOn ();
         }
+
+        //Is the water level at the sensor
         public bool IsLevelSensorOn(){
             return _controller.Read(inputMisterLevel) == PinValue.Low;
         }
