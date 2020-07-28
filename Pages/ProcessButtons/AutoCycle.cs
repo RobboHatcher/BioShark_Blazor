@@ -110,8 +110,6 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
             Console.WriteLine("Hold Step: " + DateTime.Now);
             machine.TurnOn((int)Machine.OutputPins.Distribution);
             buttons[(int)CycleButtons.DrainPump].StartProcess();
-
-
         }
         
     
