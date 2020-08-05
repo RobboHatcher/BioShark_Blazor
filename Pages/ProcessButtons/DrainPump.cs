@@ -29,7 +29,7 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
                 isRunning = true;
                 drainReadings = new double[6]{0,0,0,0,0,0};
                 machine.TurnOn((int)Machine.OutputPins.Drainpump);
-                Task.Run(()=>{DrainRunChange?.InvokeAsync();});
+                Task.Run(()=>{DrainRunChange?.Invoke();});
                 Task.Run(() => { 
                     while(!isTankEmpty() && isRunning) {}
                 });
