@@ -56,7 +56,7 @@
         <div class="col-lg-4 text-center">
             <h3>Automatic Procedures</h3>
              <table class="col-lg">
-                <tr style="padding:10px"><button class="@processButtonStyle[(int)ButtonTypes.runPumpButton]" @onclick="@(()=>ProcessToggle(0))">Run Pump w/ Auto-Off</button></tr>
+                <tr style="padding:10px"><button class="@processButtonStyle[(int)ButtonTypes.runPumpButton]" @onclick="@(()=>processController.))">Run Pump w/ Auto-Off</button></tr>
                 <tr style="padding:10px"><button class="@processButtonStyle[(int)ButtonTypes.LROButton]" @onclick="@(()=>ProcessToggle(1))">LR Oscillator</button></tr>
                 <tr style="padding:10px"><button class="@processButtonStyle[(int)ButtonTypes.DrainButton]" @onclick="@(()=>ProcessToggle(2))">Drain Pump w/ Auto-Off</button></tr>
                 <tr style="padding:10px"><button class="@processButtonStyle[(int)ButtonTypes.FillButton]" @onclick="@(()=>ProcessToggle(3))">Fill Pump</button></tr>
@@ -78,7 +78,7 @@
     private List<string> processButtonStyle;
 
     private List<IProcessButton> ProcessButtons;
-
+    ProcessController processController;
     private enum ButtonTypes {runPumpButton,LROButton,DrainButton,FillButton,AutoCycle}
     protected override void OnInitialized()
     {
@@ -86,7 +86,7 @@
         systemButtonStyle = new Dictionary<int,string>();
         processButtonStyle = new List<string>();
         
-
+        processController = new ProcessController(_machine, _adc);
         ProcessButtons = new List<IProcessButton>();
         ProcessButtons.Add(new RunPumpAutoTrigger(_machine));
         ProcessButtons.Add(new LROscillator(_machine));
