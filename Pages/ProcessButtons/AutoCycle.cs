@@ -117,6 +117,8 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
 
             machine.TurnOn((int)Machine.OutputPins.Distribution);
             buttons[(int)CycleButtons.DrainPump].StartProcess();
+<<<<<<< HEAD
+=======
             Task.Run(()=>{
                 while((DateTime.Now.Subtract(cycleStart) < TimeSpan.FromMinutes(10))){
                     Thread.Sleep(1000);
@@ -146,6 +148,7 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
             while(((LROscillator)buttons[(int)CycleButtons.LROsc]).isRunning){ Thread.Sleep(1000); }
 
             EndProcess();
+>>>>>>> d44ece03be141306d255d00df9ad15f88c7320d6
         }
         
     
