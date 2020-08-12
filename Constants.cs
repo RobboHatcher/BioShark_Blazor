@@ -21,6 +21,10 @@ namespace BioShark_Blazor{
 
         // Extra Mass factor for safety net in discharge step
         public const double ExtraMassFactor = 1.5;
+
+        public const double OscillationConstant = 0.95;
+
+        public const double PeakConstant = 1.0;
     }
 
 }

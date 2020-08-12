@@ -89,7 +89,7 @@
         processController = new ProcessController(_machine, _adc);
         ProcessButtons = new List<IProcessButton>();
         ProcessButtons.Add(new RunPumpAutoTrigger(_machine));
-        ProcessButtons.Add(new LROscillator(_machine));
+        ProcessButtons.Add(new LROscillator(_machine, _adc));
         ProcessButtons.Add(new DrainPump(_machine, _adc));
         ProcessButtons.Add(new FillPumpWithSensor(_machine));
         ProcessButtons.Add(new AutoCycle(_machine, _adc, ProcessButtons));

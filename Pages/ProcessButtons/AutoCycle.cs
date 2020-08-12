@@ -49,7 +49,7 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
         public void StartProcess(){
             isRunning = true;
             machine.TurnOn((int)Machine.OutputPins.LRCat);
-            cycleStart = DateTime.Now;
+            
             _data = new CycleData();
             RunCycle();
         }
@@ -64,7 +64,7 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
         }
 
         private async void FillMister(object source, ElapsedEventArgs e){
-
+            cycleStart = DateTime.Now;
             Console.WriteLine("Filling...");
             machine.TurnOff((int)Machine.OutputPins.Sidekick);
             buttons[(int)CycleButtons.FillPump].StartProcess();
@@ -99,6 +99,7 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
                     }
                     else if(MassDischarged > TargetMass * Constants.ExtraMassFactor){
                         EndProcess();
+
                     }
                 }
 
@@ -110,6 +111,25 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
             Console.WriteLine("Hold Step: " + DateTime.Now);
             machine.TurnOn((int)Machine.OutputPins.Distribution);
             buttons[(int)CycleButtons.DrainPump].StartProcess();
+<<<<<<< HEAD
+=======
+            Task.Run(()=>{
+                while((DateTime.Now.Subtract(cycleStart) < TimeSpan.FromMinutes(10))){}
+                StartAeration();
+            });
+        }
+
+        private void StartAeration(){
+            machine.TurnOff((int)Machine.OutputPins.Blower);
+            machine.TurnOff((int)Machine.OutputPins.Heat);
+            machine.TurnOff((int)Machine.OutputPins.Mist);
+            machine.TurnOff((int)Machine.OutputPins.MistFan);
+            buttons[(int)CycleButtons.LROsc].StartProcess();
+
+            while(((LROscillator)buttons[(int)CycleButtons.LROsc]).isRunning){ Thread.Sleep(1000); }
+
+            EndProcess();
+>>>>>>> d44ece03be141306d255d00df9ad15f88c7320d6
         }
         
     
