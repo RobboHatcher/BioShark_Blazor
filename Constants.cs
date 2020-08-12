@@ -11,7 +11,7 @@ namespace BioShark_Blazor{
         public const int MisterMax = 1500;
 
         // Amount of time the sidekick runs before starting the cycle
-        public const int SidekickMS = 120000;
+        public const int SidekickMS = 10000;
 
         // PPM target for h2O2
         public const int TargetAmt = 125;

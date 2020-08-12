@@ -9,14 +9,23 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
     
     public class DrainPump : IProcessButton {
         public event Running DrainRunChange;
-        private bool isRunning = false;
+        public bool isRunning = false;
         private Machine machine;
         private ADC adc;
         private double prevMassAvg;
         private double currMassAvg;
         private double currMassReading = 0;
 
-        private double[] drainReadings =  {0,0,0,0,0,0}; // Drain rolling average
+        private double[] _dReadings;
+        private double[] drainReadings{
+            get{
+                return _dReadings;
+            }
+            set{
+                DrainRunChange?.Invoke();
+                _dReadings = value;
+            }
+        } // Drain rolling average
 
         
         public DrainPump(Machine _machine, ADC _adc) {
@@ -25,11 +34,11 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
         }
     
         public void StartProcess(){
+
             if(!isRunning){
                 isRunning = true;
                 drainReadings = new double[6]{0,0,0,0,0,0};
                 machine.TurnOn((int)Machine.OutputPins.Drainpump);
-                Task.Run(()=>{DrainRunChange?.Invoke();});
                 Task.Run(() => { 
                     while(!isTankEmpty() && isRunning) {}
                 });
@@ -63,14 +72,15 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
             currMassReading = adc.ScaledNums[(int)ADC.ReadingTypes.Mass];
             // Drain until the mass value is fairly constant
             // Tolerance: average value must not change by more than 1 gram
-
-            for(int i = drainReadings.Length - 1; i > 0; i--)
+            double[] readings = drainReadings;
+            for(int i = readings.Length - 1; i > 0; i--)
             {
-                drainReadings[i] = drainReadings[i-1];
+                readings[i] = readings[i-1];
             }
 
-            drainReadings[0] = currMassReading;
-            
+            readings[0] = currMassReading;
+            drainReadings = readings;
+
             prevMassAvg = currMassAvg;
             currMassAvg = 0;
 

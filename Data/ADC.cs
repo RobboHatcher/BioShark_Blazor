@@ -121,7 +121,10 @@ namespace BioShark_Blazor.Data {
                     }
                     SampleNum = 0;
                 }
-                else {Console.WriteLine("Caught a zero sample point.");}
+                else {
+                    ADCReset();
+                    Console.WriteLine("Caught a zero sample point.");
+                }
 
                 busyAveraging = false;
 

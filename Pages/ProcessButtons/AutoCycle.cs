@@ -16,7 +16,7 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
         private CycleData _data;
         private double MassDischarged = 0, StartMass = 0;
         private DateTime cycleStart;
-        private System.Timers.Timer PreCycleSideKick;
+        private System.Timers.Timer CycleSideKick;
         private List<IProcessButton> buttons;
 
         public AutoCycle(Machine _machine, ADC _adc, List<IProcessButton> _buttons) {
@@ -27,7 +27,7 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
 
         public void EndProcess(){
             try{
-                PreCycleSideKick.Dispose();
+                CycleSideKick.Dispose();
             }
             catch(Exception ex){
                 
@@ -57,10 +57,10 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
 
         private void RunCycle(){
             machine.TurnOn((int)Machine.OutputPins.Sidekick);
-            PreCycleSideKick = new System.Timers.Timer(Constants.SidekickMS);
-            PreCycleSideKick.Elapsed += FillMister;
-            PreCycleSideKick.AutoReset = false;
-            PreCycleSideKick.Start();
+            CycleSideKick = new System.Timers.Timer(Constants.SidekickMS);
+            CycleSideKick.Elapsed += FillMister;
+            CycleSideKick.AutoReset = false;
+            CycleSideKick.Start();
         }
 
         private async void FillMister(object source, ElapsedEventArgs e){
@@ -98,9 +98,12 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
                         StartHold();
                     }
                     else if(MassDischarged > TargetMass * Constants.ExtraMassFactor){
+                        Console.WriteLine("Ending Cycle Early, going to start");
                         EndProcess();
 
                     }
+
+                    Thread.Sleep(500);
                 }
 
             });
@@ -109,12 +112,28 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
 
         private void StartHold(){
             Console.WriteLine("Hold Step: " + DateTime.Now);
+
+           
+
             machine.TurnOn((int)Machine.OutputPins.Distribution);
             buttons[(int)CycleButtons.DrainPump].StartProcess();
             Task.Run(()=>{
-                while((DateTime.Now.Subtract(cycleStart) < TimeSpan.FromMinutes(10))){}
+                while((DateTime.Now.Subtract(cycleStart) < TimeSpan.FromMinutes(10))){
+                    Thread.Sleep(1000);
+                    if(!((DrainPump)buttons[(int)CycleButtons.DrainPump]).isRunning) {
+                        CycleSideKick = new System.Timers.Timer(Constants.SidekickMS);
+                        CycleSideKick.Elapsed += StopSideKick;
+                        CycleSideKick.AutoReset = false;
+                        CycleSideKick.Start();
+                    }
+                }
                 StartAeration();
             });
+        }
+
+        private void StopSideKick(object source, ElapsedEventArgs e){
+            machine.TurnOff((int)Machine.OutputPins.Sidekick);
+            buttons[(int)CycleButtons.DrainPump].StartProcess();
         }
 
         private void StartAeration(){

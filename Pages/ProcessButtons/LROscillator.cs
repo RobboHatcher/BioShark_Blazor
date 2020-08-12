@@ -57,6 +57,9 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
 
         public void EndProcess(){
             isRunning = false;
+            safeToEnter = true;
+            Thread.Sleep(1000);
+            safeToEnter = false;
             machine.TurnOff((int)Machine.OutputPins.LRCat);
         }
         public string GetButtonClass(){

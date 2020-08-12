@@ -97,7 +97,8 @@
         {
             processButtonStyle.Add("btn btn-primary btn-block");
         }
-        ((DrainPump)ProcessButtons[2]).DrainRunChange += UpdateButtonStyles;
+
+        _machine.ButtonStyleTrigger += UpdateButtonStyles;
         UpdateButtonStyles();
         
         //ProcessButtons[3].notifier += _adc.MassDiffForFill;
@@ -141,6 +142,7 @@
             button.EndProcess();
         }
         _machine.TurnAllOff();
+        UpdateButtonStyles();
     }
 
     private void UpdateButtonStyles()
@@ -158,7 +160,7 @@
         {
             processButtonStyle[i] = ProcessButtons[i].GetButtonClass();
         }
-        this.StateHasChanged();
+        Task.Run(async()=> await InvokeAsync(()=>this.StateHasChanged()));
     }
     
 

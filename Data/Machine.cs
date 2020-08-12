@@ -7,11 +7,13 @@ using System.Threading.Tasks;
 
 namespace BioShark_Blazor.Data {
 
+    public delegate void CycleEvent();
     public class Machine {
 
         CancellationTokenSource source = new CancellationTokenSource();
         CancellationToken token;
 
+        public event CycleEvent ButtonStyleTrigger;
         // EDIT THIS TO CHANGE PIN NUMS
         public enum OutputPins {
             Cat = 5, Heat = 6, Blower = 12, LRCat = 13,
@@ -94,6 +96,7 @@ namespace BioShark_Blazor.Data {
             foreach(var sensor in _sensors){
                 TurnOff(sensor.PinNum);
             }
+            TurnOn((int)OutputPins.LRCat);
         }
         public void TurnOn (int sensorPin) {
             if (sensorPin == inputMisterLevel)
@@ -105,6 +108,7 @@ namespace BioShark_Blazor.Data {
             }
             _sensors[GetSensorPinIndex (sensorPin)].TurnOn ();
             Console.WriteLine("Turn on: " + Enum.GetName(typeof(OutputPins),(int) sensorPin));
+            ButtonStyleTrigger?.Invoke();
         }
 
         public void TurnOff (int sensorPin) {
@@ -118,6 +122,7 @@ namespace BioShark_Blazor.Data {
             _sensors[GetSensorPinIndex (sensorPin)].TurnOff ();
 
             Console.WriteLine("Turn off: " + Enum.GetName(typeof(OutputPins),(int) sensorPin));
+            ButtonStyleTrigger?.Invoke();
         }
 
         public bool IsOn (int sensorPin) {
