@@ -3,21 +3,12 @@ using System.Threading.Tasks;
 using System;
 
 namespace BioShark_Blazor.Pages.ProcessButtons {
-
- 
-    
-
     public class FillPumpWithSensor : IProcessButton {
-        //private delegate MassNotifier;
         private bool isRunning = false;
         private Machine machine;
-        
-
-        //public event MassNotifier notifier;
 
         public FillPumpWithSensor(Machine _machine){
             machine = _machine;
-
         }
 
 
@@ -51,15 +42,7 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
                 return "btn btn-secondary btn-block";
             else
                 return "btn btn-success btn-block";
-
         }
-
-        
-
-        
-    
-
-
     }
 
 }

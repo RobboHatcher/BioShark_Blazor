@@ -9,20 +9,35 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
 
     public class AutoCycle : IProcessButton {
 
-        public enum CycleButtons {RunPump, LROsc, DrainPump, FillPump}
-        private bool isRunning = false;
+        protected enum processEnum {RunPump, LROsc, DrainPump, FillPump}
+
         private Machine machine;
         private ADC adc;
+
+        private bool isRunning = false;
+
         private CycleData _data;
+
         private double MassDischarged = 0, StartMass = 0;
+
         private DateTime cycleStart;
+
         private System.Timers.Timer CycleSideKick;
-        private List<IProcessButton> buttons;
+
+        private List<IProcessButton> cycleProcesses;
 
         public AutoCycle(Machine _machine, ADC _adc, List<IProcessButton> _buttons) {
             machine = _machine;
             adc = _adc;
-            buttons = _buttons;
+            cycleProcesses = _buttons;
+        }
+
+        public void StartProcess(){
+            isRunning = true;
+            machine.TurnOn((int)Machine.OutputPins.LRCat);
+            
+            _data = new CycleData();
+            RunCycle();
         }
 
         public void EndProcess(){
@@ -34,7 +49,6 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
             }
             isRunning = false;
             machine.TurnAllOff();
-            machine.TurnOn((int)Machine.OutputPins.LRCat);
         }
 
         public string GetButtonClass(){
@@ -46,14 +60,6 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
         public bool GetProcessState(){
             return isRunning;
         }
-        public void StartProcess(){
-            isRunning = true;
-            machine.TurnOn((int)Machine.OutputPins.LRCat);
-            
-            _data = new CycleData();
-            RunCycle();
-        }
-
 
         private void RunCycle(){
             machine.TurnOn((int)Machine.OutputPins.Sidekick);
@@ -64,27 +70,25 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
         }
 
         private async void FillMister(object source, ElapsedEventArgs e){
-            cycleStart = DateTime.Now;
+            // Step one of the cycle: Fill the mister until the level sensor triggers.
+
+            machine.TurnOff((int)Machine.OutputPins.Sidekick); // Sidekick was running at the beginning of the cycle, so turn it off
+            cycleStart = DateTime.Now; // Save the start time for the hold step
+
             Console.WriteLine("Filling...");
-            machine.TurnOff((int)Machine.OutputPins.Sidekick);
-            buttons[(int)CycleButtons.FillPump].StartProcess();
-            // For now, wait
-            await Task.Run(()=> { 
-                while(buttons[(int)CycleButtons.FillPump].GetProcessState())
-                {
-                     Thread.Sleep(1000);
-                }
-            }); // While is running, check once per second to see if it stops.
-            StartMass = adc.ScaledNums[(int)ADC.ReadingTypes.Mass];
-            StartDischarge();
-            // wait until the ppm is at the desired point
+            cycleProcesses[(int)processEnum.FillPump].StartProcess();
+
+            // When the capacitive sensor triggers, start the discharge step.
+            machine.FillSensorSwitch += StartDischarge; 
         }
 
         private async void StartDischarge(){
+            machine.FillSensorSwitch -= StartDischarge;
+            StartMass = adc.ScaledNums[(int)ADC.ReadingTypes.Mass];
             Console.WriteLine("Discharging...");
             double TargetMass = Constants.TestingTargetMass;
 
-            buttons[(int)CycleButtons.RunPump].StartProcess();
+            cycleProcesses[(int)processEnum.RunPump].StartProcess();
             await Task.Run(()=> { 
                 while(MassDischarged < TargetMass){
                     MassDischarged = StartMass - adc.ScaledNums[(int)ADC.ReadingTypes.Mass];
@@ -94,7 +98,7 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
                     if(adc.ScaledNums[(int)ADC.ReadingTypes.HPHR] > Constants.TargetAmt)
                     {
                         Console.WriteLine("PPM Target Reached");
-                        buttons[(int)CycleButtons.RunPump].EndProcess();
+                        cycleProcesses[(int)processEnum.RunPump].EndProcess();
                         StartHold();
                     }
                     else if(MassDischarged > TargetMass * Constants.ExtraMassFactor){
@@ -112,17 +116,12 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
 
         private void StartHold(){
             Console.WriteLine("Hold Step: " + DateTime.Now);
-
-           
-
             machine.TurnOn((int)Machine.OutputPins.Distribution);
-            buttons[(int)CycleButtons.DrainPump].StartProcess();
-<<<<<<< HEAD
-=======
+            cycleProcesses[(int)processEnum.DrainPump].StartProcess();
             Task.Run(()=>{
                 while((DateTime.Now.Subtract(cycleStart) < TimeSpan.FromMinutes(10))){
                     Thread.Sleep(1000);
-                    if(!((DrainPump)buttons[(int)CycleButtons.DrainPump]).isRunning) {
+                    if(!((DrainPump)cycleProcesses[(int)processEnum.DrainPump]).isRunning) {
                         CycleSideKick = new System.Timers.Timer(Constants.SidekickMS);
                         CycleSideKick.Elapsed += StopSideKick;
                         CycleSideKick.AutoReset = false;
@@ -135,7 +134,7 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
 
         private void StopSideKick(object source, ElapsedEventArgs e){
             machine.TurnOff((int)Machine.OutputPins.Sidekick);
-            buttons[(int)CycleButtons.DrainPump].StartProcess();
+            cycleProcesses[(int)processEnum.DrainPump].StartProcess();
         }
 
         private void StartAeration(){
@@ -143,12 +142,11 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
             machine.TurnOff((int)Machine.OutputPins.Heat);
             machine.TurnOff((int)Machine.OutputPins.Mist);
             machine.TurnOff((int)Machine.OutputPins.MistFan);
-            buttons[(int)CycleButtons.LROsc].StartProcess();
+            cycleProcesses[(int)processEnum.LROsc].StartProcess();
 
-            while(((LROscillator)buttons[(int)CycleButtons.LROsc]).isRunning){ Thread.Sleep(1000); }
+            while(((LROscillator)cycleProcesses[(int)processEnum.LROsc]).isRunning){ Thread.Sleep(1000); }
 
             EndProcess();
->>>>>>> d44ece03be141306d255d00df9ad15f88c7320d6
         }
         
     

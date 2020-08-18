@@ -1,22 +1,28 @@
-﻿
+﻿<!--Blazor Index Page-->
 @page "/"
 
+<!--Using statements necessary before html for inline C# code-->
 @using System;
 @using BioShark_Blazor.Data;
 @using static BioShark_Blazor.Data.Machine;
 @using BioShark_Blazor.Pages.ProcessButtons;
 @using BioShark_Blazor.Pages.Components;
 
+<!--Singular objects used throughout the webpage are injected.
+    Look at Program.cs and Startup.cs for their implementation.-->
 @inject Machine _machine
 @inject ADC _adc
 
+<!--Begin webpage design-->
 <h1>BioShark Control Panel</h1>
 <div class="container-fluid">
     <div class="row text-center">
+        <!--Separate component for listing readings because we use that in different webpages-->
         <ReadingsComponent/>
         <div class="col-lg-4 text-center">
             <h3>Manual Part Control</h3>
             <table class="col-lg">
+            <!--Populate bootstrap class dictionary with default styles-->
             @foreach(int val in Enum.GetValues(typeof(OutputPins)))
             {
                 string localName = Enum.GetName(typeof(OutputPins), val);
@@ -27,6 +33,7 @@
                     
                 }
             }
+            <!--Buttons-->
             <tr>
                 <td style="padding:10px"><button class="@systemButtonStyle[(int)OutputPins.Cat]" @onclick="@(()=>PressSensorButton((int)OutputPins.Cat))">Catalyst Fan</button></td>
                 <td style="padding:10px"><button class="@systemButtonStyle[(int)OutputPins.MistFan]" @onclick="@(()=>PressSensorButton((int)OutputPins.MistFan))">Mister Fan</button></td> 
@@ -53,15 +60,17 @@
             </tr>
             </table>
         </div>
+
+        <!--Buttons for automatic procedures-->
         <div class="col-lg-4 text-center">
             <h3>Automatic Procedures</h3>
              <table class="col-lg">
-                <tr style="padding:10px"><button class="@processButtonStyle[(int)ButtonTypes.runPumpButton]" @onclick="@(()=>processController.))">Run Pump w/ Auto-Off</button></tr>
-                <tr style="padding:10px"><button class="@processButtonStyle[(int)ButtonTypes.LROButton]" @onclick="@(()=>ProcessToggle(1))">LR Oscillator</button></tr>
-                <tr style="padding:10px"><button class="@processButtonStyle[(int)ButtonTypes.DrainButton]" @onclick="@(()=>ProcessToggle(2))">Drain Pump w/ Auto-Off</button></tr>
-                <tr style="padding:10px"><button class="@processButtonStyle[(int)ButtonTypes.FillButton]" @onclick="@(()=>ProcessToggle(3))">Fill Pump</button></tr>
+                <tr style="padding:10px"><button class="@processButtonStyle[processController.runPump]" @onclick="@(()=>ProcessToggle(processController.runPump))">Run Pump w/ Auto-Off</button></tr>
+                <tr style="padding:10px"><button class="@processButtonStyle[processController.lowRangeOscillator]" @onclick="@(()=>ProcessToggle(processController.lowRangeOscillator))">LR Oscillator</button></tr>
+                <tr style="padding:10px"><button class="@processButtonStyle[processController.drainPump]" @onclick="@(()=>ProcessToggle(processController.drainPump))">Drain Pump w/ Auto-Off</button></tr>
+                <tr style="padding:10px"><button class="@processButtonStyle[processController.fillPump]" @onclick="@(()=>ProcessToggle(processController.fillPump))">Fill Pump</button></tr>
                 <br/>
-                <tr style="padding:10px"><button class="@processButtonStyle[4]" @onclick="@(()=>ProcessToggle(4))">Auto Cycle</button></tr>
+                <tr style="padding:10px"><button class="@processButtonStyle[processController.autoCycle]" @onclick="@(()=>processController.autoCycle.StartProcess())">Auto Cycle</button></tr>
                 <tr style="padding:10px"><button class="btn btn-info btn-block">Early Stop Cycle</button></tr>
                 <tr style="padding:10px"><button class="btn btn-danger btn-block" @onclick="@(()=>EmergencyStop())">Emergency Stop Cycle</button></tr>
                 
@@ -71,45 +80,37 @@
 </div>
 
 @code{
-
-
     private Dictionary<int,string> systemButtonStyle;
 
-    private List<string> processButtonStyle;
-
-    private List<IProcessButton> ProcessButtons;
+    private Dictionary<IProcessButton,string> processButtonStyle;
     ProcessController processController;
     private enum ButtonTypes {runPumpButton,LROButton,DrainButton,FillButton,AutoCycle}
+
+    
     protected override void OnInitialized()
     {
+        // OnInitialized needs to be overridden from the default page class to
+        // populate data structures after the page has loaded.
+
         base.OnInitialized();
         systemButtonStyle = new Dictionary<int,string>();
-        processButtonStyle = new List<string>();
         
         processController = new ProcessController(_machine, _adc);
-        ProcessButtons = new List<IProcessButton>();
-        ProcessButtons.Add(new RunPumpAutoTrigger(_machine));
-        ProcessButtons.Add(new LROscillator(_machine, _adc));
-        ProcessButtons.Add(new DrainPump(_machine, _adc));
-        ProcessButtons.Add(new FillPumpWithSensor(_machine));
-        ProcessButtons.Add(new AutoCycle(_machine, _adc, ProcessButtons));
-        for(int i =0; i < ProcessButtons.Count ; i++)
-        {
-            processButtonStyle.Add("btn btn-primary btn-block");
-        }
+        processButtonStyle.Add(processController.runPump, processController.runPump.GetButtonClass());
+        processButtonStyle.Add(processController.lowRangeOscillator, processController.lowRangeOscillator.GetButtonClass());
+        processButtonStyle.Add(processController.drainPump, processController.runPump.GetButtonClass());
+        processButtonStyle.Add(processController.fillPump, processController.runPump.GetButtonClass());
+        processButtonStyle.Add(processController.autoCycle, processController.runPump.GetButtonClass());
 
-        _machine.ButtonStyleTrigger += UpdateButtonStyles;
+        _machine.ButtonStyleTrigger += UpdateButtonStyles; // This causes all pin changes to trigger page updates.
         UpdateButtonStyles();
-        
-        //ProcessButtons[3].notifier += _adc.MassDiffForFill;
-        
     }
 
 
     
     private void PressSensorButton(int i)
     {
-        
+        // Toggles the pin that the button controls.
         if(_machine.IsOn(i))
         {
             _machine.TurnOff(i);
@@ -119,17 +120,17 @@
             _machine.TurnOn(i);
         }
         
-        UpdateButtonStyles();
-        
     }
 
-    private void ProcessToggle(int i)
+    private void ProcessToggle(IProcessButton button)
     {
-        if(!ProcessButtons[i].GetProcessState())
+        if(button.GetProcessState())
         {
-            ProcessButtons[i].StartProcess();
+            button.StartProcess();
         }
-        else ProcessButtons[i].EndProcess();
+        else button.EndProcess();
+
+        // Additionally, update the buttons with their classes.
         UpdateButtonStyles();
     }
 
@@ -137,12 +138,8 @@
     private void EmergencyStop()
     {
         // Stop all processes
-        foreach(var button in ProcessButtons)
-        {
-            button.EndProcess();
-        }
+        processController.StopAllProcesses();
         _machine.TurnAllOff();
-        UpdateButtonStyles();
     }
 
     private void UpdateButtonStyles()
@@ -156,12 +153,20 @@
             else systemButtonStyle[val] = "btn btn-primary btn-block";
         }
     
-        for(int i = 0; i < ProcessButtons.Count ; i++)
-        {
-            processButtonStyle[i] = ProcessButtons[i].GetButtonClass();
-        }
+        // The following could probably be organized better but it's simple
+        // to understand.
+        UpdateProcessStyle(processController.runPump);
+        UpdateProcessStyle(processController.lowRangeOscillator);
+        UpdateProcessStyle(processController.fillPump);
+        UpdateProcessStyle(processController.drainPump);
+        UpdateProcessStyle(processController.autoCycle);
+
         Task.Run(async()=> await InvokeAsync(()=>this.StateHasChanged()));
     }
     
+
+    private void UpdateProcessStyle(IProcessButton process){
+        processButtonStyle[process] = process.GetButtonClass();
+    }
 
 }
