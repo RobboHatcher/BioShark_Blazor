@@ -99,6 +99,7 @@
         systemButtonStyle = new Dictionary<int,string>();
         
         processController = new ProcessController(_machine, _adc);
+        processButtonStyle = new Dictionary<IProcessButton, string>();
         processButtonStyle.Add(processController.runPump, processController.runPump.GetButtonClass());
         processButtonStyle.Add(processController.lowRangeOscillator, processController.lowRangeOscillator.GetButtonClass());
         processButtonStyle.Add(processController.drainPump, processController.runPump.GetButtonClass());
@@ -130,9 +131,10 @@
         
     }
 
-    private void ProcessToggle(IProcessButton button)
+    private void ProcessToggle( IProcessButton button)
     {
-        if(button.GetProcessState())
+        
+        if(!button.GetProcessState())
         {
             button.StartProcess();
         }

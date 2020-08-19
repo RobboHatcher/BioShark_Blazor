@@ -27,12 +27,14 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
                 while(!safeToEnter){
                     if(adc.ScaledNums[(int)ADC.ReadingTypes.HPLR] > Constants.OscillationConstant)
                     {
-                        machine.TurnOn((int)Machine.OutputPins.LRCat);
+                        if(!machine.IsOn((int)Machine.OutputPins.LRCat))
+                            machine.TurnOn((int)Machine.OutputPins.LRCat);
                         if(adc.ScaledNums[(int)ADC.ReadingTypes.HPLR] > MaxVal) MaxVal = adc.ScaledNums[(int)ADC.ReadingTypes.HPLR];
                     }
 
                     else{
-                        machine.TurnOff((int)Machine.OutputPins.LRCat);
+                        if(machine.IsOn((int)Machine.OutputPins.LRCat))
+                            machine.TurnOff((int)Machine.OutputPins.LRCat);
                         if(MaxVal <= Constants.PeakConstant && MaxVal > Constants.OscillationConstant)
                         {
                             PeakCtr++;
@@ -60,7 +62,7 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
             safeToEnter = true;
             Thread.Sleep(1000);
             safeToEnter = false;
-            machine.TurnOff((int)Machine.OutputPins.LRCat);
+            machine.TurnOn((int)Machine.OutputPins.LRCat);
         }
         public string GetButtonClass(){
             if(!isRunning)

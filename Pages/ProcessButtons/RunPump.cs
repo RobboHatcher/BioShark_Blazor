@@ -46,7 +46,7 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
             while(isRunning){
                 if(machine.IsLevelSensorOn()){
                     Thread.Sleep(100);
-                    if(machine.IsLevelSensorOn()){
+                    if(machine.IsLevelSensorOn() && machine.IsOn((int)Machine.OutputPins.RunPump)){
                         machine.TurnOff((int)Machine.OutputPins.RunPump);
                     }
                 }

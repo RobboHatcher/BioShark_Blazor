@@ -48,7 +48,15 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
                 
             }
             isRunning = false;
+            
+            foreach(var process in cycleProcesses){
+                process.EndProcess();
+            }
+            
+
             machine.TurnAllOff();
+
+            cycleProcesses[2].StartProcess(); //Start a drain 
         }
 
         public string GetButtonClass(){
@@ -73,7 +81,7 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
             // Step one of the cycle: Fill the mister until the level sensor triggers.
 
             machine.TurnOff((int)Machine.OutputPins.Sidekick); // Sidekick was running at the beginning of the cycle, so turn it off
-            cycleStart = DateTime.Now; // Save the start time for the hold step
+            
 
             Console.WriteLine("Filling...");
             cycleProcesses[(int)processEnum.FillPump].StartProcess();
@@ -83,10 +91,11 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
         }
 
         private async void StartDischarge(){
+            cycleStart = DateTime.Now; // Save the start time for the hold step
             machine.FillSensorSwitch -= StartDischarge;
             StartMass = adc.ScaledNums[(int)ADC.ReadingTypes.Mass];
             Console.WriteLine("Discharging...");
-            double TargetMass = machine.TargetMass;
+            double TargetMass = machine.targetMass;
 
             cycleProcesses[(int)processEnum.RunPump].StartProcess();
             await Task.Run(()=> { 
@@ -95,6 +104,7 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
                     Thread.Sleep(500);
                 } // Wait until mass above target
                 while(MassDischarged >= TargetMass){
+                    MassDischarged = StartMass - adc.ScaledNums[(int)ADC.ReadingTypes.Mass];
                     if(adc.ScaledNums[(int)ADC.ReadingTypes.HPHR] > Constants.TargetAmt)
                     {
                         Console.WriteLine("PPM Target Reached");
