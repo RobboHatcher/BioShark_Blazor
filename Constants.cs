@@ -13,6 +13,10 @@ namespace BioShark_Blazor{
         // Amount of time the sidekick runs before starting the cycle
         public const int SidekickMS = 10000;
 
+
+        // Used in the calculation of the target mass
+        public const float HPMassFraction6Log = 2.2f;
+        public const float targetMassConst = .35f;
         // PPM target for h2O2
         public const int TargetAmt = 125;
 

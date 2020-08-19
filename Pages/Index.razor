@@ -21,6 +21,9 @@
         <ReadingsComponent/>
         <div class="col-lg-4 text-center">
             <h3>Manual Part Control</h3>
+            
+            <input @bind="roomSize"/>
+            <button class="btn btn-primary" @onclick="@(CalculateRoomMass)"></button>
             <table class="col-lg">
             <!--Populate bootstrap class dictionary with default styles-->
             @foreach(int val in Enum.GetValues(typeof(OutputPins)))
@@ -85,7 +88,7 @@
     private Dictionary<IProcessButton,string> processButtonStyle;
     ProcessController processController;
     private enum ButtonTypes {runPumpButton,LROButton,DrainButton,FillButton,AutoCycle}
-
+    private int roomSize;
     
     protected override void OnInitialized()
     {
@@ -107,7 +110,12 @@
     }
 
 
-    
+    private void CalculateRoomMass()
+    {
+        _machine.targetMass = roomSize * Constants.HPMassFraction6Log / Constants.targetMassConst;
+        Console.WriteLine("Target mass: " + _machine.targetMass);
+    }
+
     private void PressSensorButton(int i)
     {
         // Toggles the pin that the button controls.

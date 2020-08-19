@@ -23,6 +23,7 @@ namespace BioShark_Blazor.Data {
 
         public static int inputMisterLevel = 4; // Mister level sensor: active low
 
+        public double targetMass {get;set;} = Constants.TestingTargetMass;
         public int TestPin = 24;
         public int VerifyNum = 0;
         public event Action FillSensorSwitch;

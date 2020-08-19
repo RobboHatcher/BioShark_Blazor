@@ -86,7 +86,7 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
             machine.FillSensorSwitch -= StartDischarge;
             StartMass = adc.ScaledNums[(int)ADC.ReadingTypes.Mass];
             Console.WriteLine("Discharging...");
-            double TargetMass = Constants.TestingTargetMass;
+            double TargetMass = machine.TargetMass;
 
             cycleProcesses[(int)processEnum.RunPump].StartProcess();
             await Task.Run(()=> { 
