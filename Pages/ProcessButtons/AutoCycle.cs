@@ -25,7 +25,7 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
         private System.Timers.Timer CycleSideKick;
 
         private List<IProcessButton> cycleProcesses;
-
+        public event Action cycleStartEvent;
         public AutoCycle(Machine _machine, ADC _adc, List<IProcessButton> _buttons) {
             machine = _machine;
             adc = _adc;
@@ -33,6 +33,8 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
         }
 
         public void StartProcess(){
+
+            cycleStartEvent?.Invoke();
             isRunning = true;
             machine.TurnOn((int)Machine.OutputPins.LRCat);
             

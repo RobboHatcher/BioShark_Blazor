@@ -12,6 +12,7 @@
     Look at Program.cs and Startup.cs for their implementation.-->
 @inject Machine _machine
 @inject ADC _adc
+@inject FileIO _fileWriter
 
 <!--Begin webpage design-->
 <h1>BioShark Control Panel</h1>
@@ -106,6 +107,7 @@
         processButtonStyle.Add(processController.autoCycle, processController.runPump.GetButtonClass());
 
         _machine.ButtonStyleTrigger += UpdateButtonStyles; // This causes all pin changes to trigger page updates.
+        _fileWriter.Initialize(_machine, _adc, processController);
         UpdateButtonStyles();
     }
 

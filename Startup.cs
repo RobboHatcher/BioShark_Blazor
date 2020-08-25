@@ -32,6 +32,7 @@ namespace BioShark_Blazor
             services.AddServerSideBlazor();
             services.AddSingleton<Machine>();
             services.AddSingleton<ADC>();
+            services.AddSingleton<FileIO>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
