@@ -60,6 +60,7 @@ namespace BioShark_Blazor.Data {
             foreach (var sensor in _sensors) {
                 OpenOutPinToOffState (sensor.PinNum);
             }
+            
 
             try {
                 _controller.OpenPin (inputMisterLevel, PinMode.Input);
@@ -67,6 +68,8 @@ namespace BioShark_Blazor.Data {
                 Console.WriteLine ("Pin already open, setting to new pin Mode");
                 _controller.SetPinMode (inputMisterLevel, PinMode.Input);
             }
+
+            TurnAllOff();
         }
 
         // By default, OpenPin will open off.

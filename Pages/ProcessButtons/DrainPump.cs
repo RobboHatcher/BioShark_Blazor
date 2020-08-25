@@ -34,7 +34,7 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
         }
     
         public void StartProcess(){
-
+            Console.WriteLine(isRunning);
             if(!isRunning){
                 isRunning = true;
                 drainReadings = new double[6]{0,0,0,0,0,0};
