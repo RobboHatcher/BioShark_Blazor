@@ -26,6 +26,7 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
 
         private List<IProcessButton> cycleProcesses;
         public event Action cycleStartEvent;
+        public event Action cycleStopEvent;
         public AutoCycle(Machine _machine, ADC _adc, List<IProcessButton> _buttons) {
             machine = _machine;
             adc = _adc;
@@ -57,7 +58,7 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
             
 
             machine.TurnAllOff();
-
+            cycleStopEvent?.Invoke();
             cycleProcesses[2].StartProcess(); //Start a drain 
         }
 
