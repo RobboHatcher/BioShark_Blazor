@@ -22,7 +22,10 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
         public void StartProcess(){
             isRunning = true;
             machine.TurnOn((int)Machine.OutputPins.LRCat);
-            // Every quarter second: check for safe to enter
+                // Every quarter second: check for safe to enter
+            do{ // Wait allow the cycle to catalyze until less than LROscStart (normally 5 ppm HPHR)
+                Thread.Sleep(500);
+            } while (adc.ScaledNums[(int)ADC.ReadingTypes.HPHR] > Constants.LROscStart);
             Task.Run(()=>{
                 while(!safeToEnter){
                     if(adc.ScaledNums[(int)ADC.ReadingTypes.HPLR] > Constants.OscillationConstant)
@@ -54,9 +57,7 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
                 }
             });
 
-
         }
-
         public void EndProcess(){
             isRunning = false;
             safeToEnter = true;
@@ -64,6 +65,7 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
             safeToEnter = false;
             machine.TurnOn((int)Machine.OutputPins.LRCat);
         }
+
         public string GetButtonClass(){
             if(!isRunning)
                 return "btn btn-secondary btn-block";

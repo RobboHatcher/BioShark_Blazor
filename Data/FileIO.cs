@@ -1,5 +1,6 @@
 using BioShark_Blazor.Pages.ProcessButtons;
 using System.IO;
+using System;
 
 namespace BioShark_Blazor.Data{
 
@@ -19,8 +20,9 @@ namespace BioShark_Blazor.Data{
 
         private void StartFileWriter(){
             PeriodicFileWriter = new System.Timers.Timer(1000);
-            writer = new StreamWriter(@"~/BioShark Data/CycleTrackFile.csv");
-            writer.WriteLine("Mass,HPHR,HPLR,Temp,RH,Mist,MistFan,RunPump,FillPump,DistFan,HRCat,LRCat,"+
+            
+            writer = new StreamWriter(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)+"/BioShark Data/CycleTrackFile.csv");
+            writer.WriteLine("Time,Mass,HPHR,HPLR,Temp,RH,MassDischarged,Mist,MistFan,RunPump,FillPump,DistFan,HRCat,LRCat,"+
                 "Sidekick,DrainPump,Blower,Heater,Catalyst,FillStep,DischargeStep,AerationStep");
             PeriodicFileWriter.Enabled = true;
             PeriodicFileWriter.Elapsed += WriteToFile;
@@ -43,11 +45,13 @@ namespace BioShark_Blazor.Data{
 
         private string FormattedDataLine(){
             string buildString = "";
-            buildString += adc.ScaledNums[(int)ADC.ReadingTypes.Mass].ToString() + ',' +
+            buildString += DateTime.Now.ToString("HH:mm:ss") + ',' +
+                adc.ScaledNums[(int)ADC.ReadingTypes.Mass].ToString() + ',' +
                 adc.ScaledNums[(int)ADC.ReadingTypes.HPHR] + ',' +
                 adc.ScaledNums[(int)ADC.ReadingTypes.HPLR] + ',' +
                 adc.ScaledNums[(int)ADC.ReadingTypes.Temp] + ',' +
                 adc.ScaledNums[(int)ADC.ReadingTypes.RH] + ',' +
+                controller.autoCycle.MassDischarged + ',' +
                 machine.IsOn((int)Machine.OutputPins.Mist).ToString() + ',' +
                 machine.IsOn((int)Machine.OutputPins.MistFan).ToString() + ',' +
                 machine.IsOn((int)Machine.OutputPins.RunPump).ToString() + ',' +

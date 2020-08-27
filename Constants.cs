@@ -13,15 +13,12 @@ namespace BioShark_Blazor{
         // Amount of time the sidekick runs before starting the cycle
         public const int SidekickMS = 10000;
 
-
+        public const double LROscStart = 5.0;        
         // Used in the calculation of the target mass
         public const float HPMassFraction6Log = 2.2f;
         public const float targetMassConst = .35f;
-        // PPM target for h2O2
+        // PPM target for h2O2 -- normally set with the room size.
         public const int TargetAmt = 125;
-
-        // Sample Target Mass until we put it in the config
-        public const int TestingTargetMass = 100;
 
         // Extra Mass factor for safety net in discharge step
         public const double ExtraMassFactor = 1.5;

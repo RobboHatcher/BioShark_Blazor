@@ -9,6 +9,7 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
         public RunPumpAutoTrigger runPump;
         public DrainPump drainPump;
         public AutoCycle autoCycle;
+        
         public ProcessController(Machine _machine, ADC _adc){
             fillPump = new FillPumpWithSensor(_machine);
             lowRangeOscillator = new LROscillator(_machine, _adc);
