@@ -37,6 +37,8 @@
                     
                 }
             }
+
+            
             <!--Buttons-->
             <tr>
                 <td style="padding:10px"><button class="@systemButtonStyle[(int)OutputPins.Cat]" @onclick="@(()=>PressSensorButton((int)OutputPins.Cat))">Catalyst Fan</button></td>
@@ -173,7 +175,7 @@
         UpdateProcessStyle(processController.fillPump);
         UpdateProcessStyle(processController.drainPump);
         UpdateProcessStyle(processController.autoCycle);
-        MassDischarged=processController.autoCycle.MassDischarged;
+        MassDischarged=Math.Round(processController.autoCycle.MassDischarged, 2);
         Task.Run(async()=> await InvokeAsync(()=>this.StateHasChanged()));
     }
     

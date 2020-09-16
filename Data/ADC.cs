@@ -24,7 +24,7 @@ namespace BioShark_Blazor.Data {
         
         
         private int NaNCounter = 0;
-        private int SampleNum = 0;
+        private uint SampleNum = 0;
         // For storing the sum of the readings until averaged
         private double[] readSums = {0,0,0,0,0};
         private double[] Avgs = {0,0,0,0,0};
@@ -123,6 +123,7 @@ namespace BioShark_Blazor.Data {
                 }
                 else {
                     ADCReset();
+                    
                     Console.WriteLine("Caught a zero sample point.");
                 }
 
@@ -131,6 +132,7 @@ namespace BioShark_Blazor.Data {
                 while(busyCalibrating) {}
 
                 ScaledNums = ComputeScaledValues();
+
                 
             }
         }
@@ -149,12 +151,16 @@ namespace BioShark_Blazor.Data {
                 else if (i == (int)(ReadingTypes.Temp)){
                     // Analog to Kelvin
                     double AnalogTempResult = Avgs[i] / 6553.6;
-                    AnalogTempResult = 100000 * ((4.88 / AnalogTempResult) - 1);
-                    AnalogTempResult = 1 / (0.000828083 + (0.000208691 * Math.Log(AnalogTempResult)) + 
-                        (0.000000080812 * Math.Pow(Math.Log(AnalogTempResult), 3)));
-                    
-                    // Kelvin to Celsius
-                    ComputedArray[i] = AnalogTempResult - 273.15;
+                    if(AnalogTempResult != 0){
+                        AnalogTempResult = 100000 * ((4.88 / AnalogTempResult) - 1);
+                        AnalogTempResult = 1 / (0.000828083 + (0.000208691 * Math.Log(AnalogTempResult)) + 
+                            (0.000000080812 * Math.Pow(Math.Log(AnalogTempResult), 3)));
+                        
+                        // Kelvin to Celsius
+                        ComputedArray[i] = AnalogTempResult - 273.15;
+                    }
+
+                    else { ComputedArray[i] = ScaledNums[i] };
                 }
 
                 else if (i == (int)(ReadingTypes.RH)){

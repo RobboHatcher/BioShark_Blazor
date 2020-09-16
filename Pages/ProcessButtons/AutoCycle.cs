@@ -60,6 +60,7 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
 
             machine.TurnAllOff();
             cycleStopEvent?.Invoke();
+            secondDrainCompleteFlag = false;
             cycleProcesses[2].StartProcess(); //Start a drain 
         }
 
@@ -98,7 +99,7 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
             cycleStart = DateTime.Now; // Save the start time for the hold step
             machine.FillSensorSwitch -= StartDischarge;
             StartMass = adc.ScaledNums[(int)ADC.ReadingTypes.Mass];
-            Console.WriteLine("Discharging...");
+            Console.WriteLine("Discharging... Start mass @ " + Math.Round(StartMass,2));
             double TargetMass = machine.targetMass;
 
             cycleProcesses[(int)processEnum.RunPump].StartProcess();
@@ -146,6 +147,7 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
                         CycleSideKick.Elapsed += StopSideKick;
                         CycleSideKick.AutoReset = false;
                         secondDrainCompleteFlag = true;
+                        machine.TurnOn((int)Machine.OutputPins.Sidekick);
                         CycleSideKick.Start();
                     }
                 }
@@ -165,6 +167,7 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
             machine.TurnOff((int)Machine.OutputPins.Heat);
             machine.TurnOff((int)Machine.OutputPins.Mist);
             machine.TurnOff((int)Machine.OutputPins.MistFan);
+            
             cycleProcesses[(int)processEnum.LROsc].StartProcess();
             while(((LROscillator)cycleProcesses[(int)processEnum.LROsc]).isRunning){ Thread.Sleep(1000); }
 

@@ -20,13 +20,17 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
         }
 
         public void StartProcess(){
+
             isRunning = true;
+            machine.TurnOn((int)Machine.OutputPins.Cat);
             machine.TurnOn((int)Machine.OutputPins.LRCat);
                 // Every quarter second: check for safe to enter
             do{ // Wait allow the cycle to catalyze until less than LROscStart (normally 5 ppm HPHR)
                 Thread.Sleep(500);
             } while (adc.ScaledNums[(int)ADC.ReadingTypes.HPHR] > Constants.LROscStart);
+            machine.TurnOff((int)Machine.OutputPins.Distribution);
             Task.Run(()=>{
+                
                 while(!safeToEnter){
                     if(adc.ScaledNums[(int)ADC.ReadingTypes.HPLR] > Constants.OscillationConstant)
                     {
@@ -75,8 +79,9 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
 
         private void SafetyCheck() {
             if(PeakCtr >= 3){
-                EndProcess();
                 safeToEnter = true;
+                EndProcess();
+                
             }
 
             else safeToEnter = false;
