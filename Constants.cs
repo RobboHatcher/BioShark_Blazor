@@ -26,6 +26,8 @@ namespace BioShark_Blazor{
         public const double OscillationConstant = 0.95;
 
         public const double PeakConstant = 1.0;
+
+        public const string FileNameFormat = "yyyy-MM-dd";
     }
 
 }
