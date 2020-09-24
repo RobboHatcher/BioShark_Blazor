@@ -19,8 +19,9 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
 
         public double MassDischarged = 0;
         private double StartMass = 0;
-
+        private TimeSpan estTimeLeft = new TimeSpan(0,0,0);
         private DateTime cycleStart;
+        private DateTime estCycleEnd = DateTime.Now;
 
         private System.Timers.Timer CycleSideKick;
         private bool secondDrainCompleteFlag = false;
@@ -75,6 +76,7 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
         }
 
         private void RunCycle(){
+            estTimeLeft = TimeSpan.FromSeconds(60 * (Math.Log(TargetMass, 1.15)* 2) - 30);
             machine.TurnOn((int)Machine.OutputPins.Sidekick);
             CycleSideKick = new System.Timers.Timer(Constants.SidekickMS);
             CycleSideKick.Elapsed += FillMister;
