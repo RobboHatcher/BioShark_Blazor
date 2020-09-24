@@ -160,7 +160,7 @@ namespace BioShark_Blazor.Data {
                         ComputedArray[i] = AnalogTempResult - 273.15;
                     }
 
-                    else { ComputedArray[i] = ScaledNums[i] };
+                    else { ComputedArray[i] = ScaledNums[i]; }
                 }
 
                 else if (i == (int)(ReadingTypes.RH)){

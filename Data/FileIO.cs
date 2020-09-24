@@ -1,4 +1,5 @@
 using BioShark_Blazor.Pages.ProcessButtons;
+using static BioShark_Blazor.Constants;
 using System.IO;
 using System;
 
@@ -20,7 +21,7 @@ namespace BioShark_Blazor.Data{
 
         private void StartFileWriter(){
             PeriodicFileWriter = new System.Timers.Timer(1000);
-            string dataFolder = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)+"/BioShark Data/");
+            string dataFolder = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)+"/BioShark Data/";
             writer = new StreamWriter(dataFolder + GetMFileName(dataFolder,false));
             writer.WriteLine("Time,Mass,HPHR,HPLR,Temp,RH,MassDischarged,Mist,MistFan,RunPump,FillPump,DistFan,HRCat,LRCat,"+
                 "Sidekick,DrainPump,Blower,Heater,Catalyst,FillStep,DischargeStep,AerationStep");
@@ -45,15 +46,15 @@ namespace BioShark_Blazor.Data{
             string filename = "";
 
             //Each File has the format YYYY-MM-DD(i).csv or YYYY-MM-DD(iL).csv, i is the index of how many files have been made that day.
-            string currDate = DateTime.Now.ToString(FileNameFormat);
-            var FileList =  GetFiles(DataFolder);
+            string currDate = DateTime.Now.ToString(Constants.FileNameFormat);
+            var FileList =  Directory.GetFiles(DataFolder);
 
-            WriteLine("Filenames:");
+            Console.WriteLine("Filenames:");
             int Maxdex = 0;
             foreach(var I in FileList)
             {
                 string fileName = I;
-                WriteLine(fileName);
+                Console.WriteLine(fileName);
                 if (fileName.Substring(0,10) == currDate.Substring(0,10))
                 {
                     int index = Convert.ToInt32(fileName.Substring(11, 1));
@@ -73,7 +74,7 @@ namespace BioShark_Blazor.Data{
             else
                 filename += currDate + '(' + Maxdex + "L).csv";
 
-            WriteLine("Creating file " + filename);
+            Console.WriteLine("Creating file " + filename);
             return filename;
         }
 
