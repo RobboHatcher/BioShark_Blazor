@@ -10,13 +10,16 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
         public DrainPump drainPump;
         public AutoCycle autoCycle;
         
+        public SummaryTracker tracker = new SummaryTracker();
+
+
         public ProcessController(Machine _machine, ADC _adc){
             fillPump = new FillPumpWithSensor(_machine);
             lowRangeOscillator = new LROscillator(_machine, _adc);
             drainPump = new DrainPump(_machine, _adc);
-            runPump = new RunPumpAutoTrigger(_machine);
+            runPump = new RunPumpAutoTrigger(_machine, tracker, _adc);
             autoCycle = new AutoCycle(_machine, _adc, 
-                new List<IProcessButton> {runPump, lowRangeOscillator, drainPump, fillPump});
+                new List<IProcessButton> {runPump, lowRangeOscillator, drainPump, fillPump}, tracker);
         }
 
         public void StopAllProcesses(){

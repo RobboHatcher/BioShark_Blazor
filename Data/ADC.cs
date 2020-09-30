@@ -13,7 +13,7 @@ namespace BioShark_Blazor.Data {
 
     
     public class ADC {
-
+        public event Action OnAverageValues;
         public enum ADCOutPins { ResetPin = 22, ConvertStartPin = 24 }
         public enum ADCInPins { BusyPin = 25 }
         GpioController _adcControl;
@@ -105,6 +105,7 @@ namespace BioShark_Blazor.Data {
         private void AverageValuesSendDataPoint(){
             while(true)
             {
+
                 Thread.Sleep(250);
 
                 while(busyReading) {};
@@ -132,7 +133,7 @@ namespace BioShark_Blazor.Data {
                 while(busyCalibrating) {}
 
                 ScaledNums = ComputeScaledValues();
-
+                
                 
             }
         }

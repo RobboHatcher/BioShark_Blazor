@@ -20,6 +20,7 @@ namespace BioShark_Blazor.Data{
         }
 
         private void StartFileWriter(){
+            
             PeriodicFileWriter = new System.Timers.Timer(1000);
             string dataFolder = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)+"/BioShark Data/";
             writer = new StreamWriter(dataFolder + GetMFileName(dataFolder,false));
@@ -33,6 +34,10 @@ namespace BioShark_Blazor.Data{
 
 
         private void StopFileWriter(){
+            writer.WriteLine("Summary");
+            writer.WriteLine("")
+            writer.WriteLine(controller.tracker.SummaryString());
+
             PeriodicFileWriter.Stop();
             PeriodicFileWriter.Close();
             writer.Close();

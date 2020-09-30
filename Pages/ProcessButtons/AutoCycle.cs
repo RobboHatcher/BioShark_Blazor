@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
+
+
 namespace BioShark_Blazor.Pages.ProcessButtons {
 
     public class AutoCycle : IProcessButton {
@@ -15,11 +17,11 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
         private ADC adc;
 
         private bool isRunning = false;
-
+        SummaryTracker tracker;
 
         public double MassDischarged = 0;
         private double StartMass = 0;
-        private TimeSpan estTimeLeft = new TimeSpan(0,0,0);
+        public TimeSpan estTimeLeft = new TimeSpan(0,0,0);
         private DateTime cycleStart;
         private DateTime estCycleEnd = DateTime.Now;
 
@@ -30,13 +32,18 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
         public event Action cycleStopEvent;
 
 
-        public AutoCycle(Machine _machine, ADC _adc, List<IProcessButton> _buttons) {
+        public AutoCycle(Machine _machine, ADC _adc, List<IProcessButton> _buttons, SummaryTracker _tracker) {
             machine = _machine;
             adc = _adc;
             cycleProcesses = _buttons;
+            tracker = _tracker;
+            adc.OnAverageValues += UpdateEstTime;
+
         }
 
         public void StartProcess(){
+
+
 
             cycleStartEvent?.Invoke();
             isRunning = true;
@@ -58,14 +65,27 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
                 process.EndProcess();
             }
             
-
+            tracker.massDisch = MassDischarged;
+            tracker.endMass = adc.ScaledNums[(int)ADC.ReadingTypes.Mass];
+            tracker.massChange = tracker.begMass - tracker.endMass;
+            tracker.endRH = adc.ScaledNums[(int)ADC.ReadingTypes.RH];
+            tracker.endTemp = adc.ScaledNums[(int)ADC.ReadingTypes.Temp];
+            tracker.endTime = DateTime.Now;
+            
             machine.TurnAllOff();
             cycleStopEvent?.Invoke();
             secondDrainCompleteFlag = false;
             cycleProcesses[2].StartProcess(); //Start a drain 
         }
 
+        public void UpdateEstTime(){
+            estTimeLeft = TimeSpan.FromSeconds(60 * (Math.Log(machine.targetMass, 1.15)* 2) - 30);
+            
+        }
+
         public string GetButtonClass(){
+            
+
             if(!isRunning)
                 return "btn btn-secondary btn-block";
             else
@@ -76,8 +96,14 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
         }
 
         private void RunCycle(){
-            estTimeLeft = TimeSpan.FromSeconds(60 * (Math.Log(TargetMass, 1.15)* 2) - 30);
+            estCycleEnd = DateTime.Now.Add(estTimeLeft);
             machine.TurnOn((int)Machine.OutputPins.Sidekick);
+
+            
+            tracker.roomVolume = BioShark_Blazor.Pages.Index.roomSize;
+            tracker.begMass = adc.ScaledNums[(int)ADC.ReadingTypes.Mass];
+            tracker.begRH = adc.ScaledNums[(int)ADC.ReadingTypes.RH];
+            tracker.begTemp = adc.ScaledNums[(int)ADC.ReadingTypes.Temp];
             CycleSideKick = new System.Timers.Timer(Constants.SidekickMS);
             CycleSideKick.Elapsed += FillMister;
             CycleSideKick.AutoReset = false;
@@ -99,6 +125,8 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
 
         private async void StartDischarge(){
             cycleStart = DateTime.Now; // Save the start time for the hold step
+            tracker.startTime = cycleStart;
+
             machine.FillSensorSwitch -= StartDischarge;
             StartMass = adc.ScaledNums[(int)ADC.ReadingTypes.Mass];
             Console.WriteLine("Discharging... Start mass @ " + Math.Round(StartMass,2));

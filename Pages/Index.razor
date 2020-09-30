@@ -23,8 +23,7 @@
         <div class="col-lg-4 text-center">
             <h3>Manual Part Control</h3>
             
-            <input @bind="roomSize"/>
-            <button class="btn btn-primary" @onclick="@(CalculateRoomMass)">Calculate Target Mass</button>
+           
             <table class="col-lg">
             <!--Populate bootstrap class dictionary with default styles-->
             @foreach(int val in Enum.GetValues(typeof(OutputPins)))
@@ -40,6 +39,11 @@
 
             
             <!--Buttons-->
+            <tr>
+                <td class="text-right padding:10px"><input @bind="roomSize"/> m<sup>3</sup></td>
+                <td class="text-left padding:10px"><button class="btn btn-primary" @onclick="@(CalculateRoomMass)">Calculate Target Mass</button></td>
+            </tr>
+            <br>
             <tr>
                 <td style="padding:10px"><button class="@systemButtonStyle[(int)OutputPins.Cat]" @onclick="@(()=>PressSensorButton((int)OutputPins.Cat))">Catalyst Fan</button></td>
                 <td style="padding:10px"><button class="@systemButtonStyle[(int)OutputPins.MistFan]" @onclick="@(()=>PressSensorButton((int)OutputPins.MistFan))">Mister Fan</button></td> 
@@ -79,8 +83,8 @@
                 <tr style="padding:10px"><button class="@processButtonStyle[processController.autoCycle]" @onclick="@(()=>processController.autoCycle.StartProcess())">Auto Cycle</button></tr>
                 <tr style="padding:10px"><button class="btn btn-info btn-block">Early Stop Cycle</button></tr>
                 <tr style="padding:10px"><button class="btn btn-danger btn-block" @onclick="@(()=>EmergencyStop())">Emergency Stop Cycle</button></tr>
-                <tr style="padding:10px"><td>@Math.Round(MassDischarged,2).ToString()+" Grams Discharged"</td></tr>
-                <tr style="padding:10px"
+                <tr style="padding:10px">@Math.Round(MassDischarged,2).ToString() Grams Discharged</tr>
+                <tr style="padding:10px">Estimated cycle end time: @TimeEnd.ToString(@"hh\:mm\:ss tt")</tr>
              </table>
         </div>
     </div>
@@ -92,8 +96,9 @@
     private Dictionary<IProcessButton,string> processButtonStyle;
     ProcessController processController;
     private enum ButtonTypes {runPumpButton,LROButton,DrainButton,FillButton,AutoCycle}
-    private int roomSize;
-    
+    public static int roomSize;
+    public DateTime TimeEnd = DateTime.Now;
+    public TimeSpan cycleTimeLeft = new TimeSpan(0,0,0);
     public double MassDischarged = 0;
     protected override void OnInitialized()
     {
@@ -113,7 +118,10 @@
 
         _machine.ButtonStyleTrigger += UpdateButtonStyles; // This causes all pin changes to trigger page updates.
         _fileWriter.Initialize(_machine, _adc, processController);
+        
+        _adc.OnAverageValues += UpdateTimeLeft;
         UpdateButtonStyles();
+        UpdateTimeLeft();
     }
 
 
@@ -121,6 +129,7 @@
     {
         _machine.targetMass = roomSize * Constants.HPMassFraction6Log / Constants.targetMassConst;
         Console.WriteLine("Target mass: " + _machine.targetMass);
+        UpdateTimeLeft();
     }
 
     private void PressSensorButton(int i)
@@ -150,6 +159,11 @@
         UpdateButtonStyles();
     }
 
+    private void UpdateTimeLeft() {
+        cycleTimeLeft = processController.autoCycle.estTimeLeft;
+        TimeEnd = DateTime.Now.Add(cycleTimeLeft);
+        Task.Run(async()=> await InvokeAsync(()=>this.StateHasChanged()));
+    }
 
     private void EmergencyStop()
     {
@@ -177,6 +191,8 @@
         UpdateProcessStyle(processController.drainPump);
         UpdateProcessStyle(processController.autoCycle);
         MassDischarged=Math.Round(processController.autoCycle.MassDischarged, 2);
+
+        
         Task.Run(async()=> await InvokeAsync(()=>this.StateHasChanged()));
     }
     

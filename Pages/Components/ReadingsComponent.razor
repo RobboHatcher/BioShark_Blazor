@@ -50,6 +50,7 @@
             Temp = Readings[(int)ADC.ReadingTypes.Temp];
             RH = Readings[(int)ADC.ReadingTypes.RH];
 
+
             await InvokeAsync(()=> {
                 StateHasChanged();
             });

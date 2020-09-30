@@ -83,6 +83,7 @@ namespace BioShark_Blazor.Data {
         // Invokes the Tank filled event.
         public async Task FillTank(){
             Console.WriteLine("Filling Tank. Sensor reading currently " + _controller.Read(4));
+            Thread.Sleep(10);
             await _controller.WaitForEventAsync(4, PinEventTypes.Falling, token);
             Console.WriteLine("Tank Filled.");
             FillSensorSwitch?.Invoke();

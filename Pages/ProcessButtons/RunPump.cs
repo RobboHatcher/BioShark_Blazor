@@ -11,7 +11,10 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
         private bool isRunning = false;
         private bool DischargeComplete = false;
         private Machine machine; 
-        
+        private SummaryTracker tracker;
+        private ADC adc;
+
+
         public bool IsInDischarge{
             set{
                 IsInDischarge = value;
@@ -22,8 +25,10 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
 
         public event Action RunPumpRunChange;
 
-        public RunPumpAutoTrigger(Machine _machine){
+        public RunPumpAutoTrigger(Machine _machine, SummaryTracker _tracker, ADC _adc){
             machine = _machine;
+            tracker = _tracker;
+            adc = _adc;
         }
 
 
@@ -56,6 +61,16 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
                     if(!machine.IsOn((int)Machine.OutputPins.RunPump)){
                         machine.TurnOn((int)Machine.OutputPins.RunPump);
                     }
+                }
+
+                if(tracker.peakPPM < adc.ScaledNums[(int)ADC.ReadingTypes.HPHR]) {
+                    tracker.peakPPM = adc.ScaledNums[(int)ADC.ReadingTypes.HPHR];
+                    tracker.peakPPMTime = DateTime.Now;
+                }
+
+                if(tracker.peakRH < adc.ScaledNums[(int)ADC.ReadingTypes.RH]) {
+                    tracker.peakRH = adc.ScaledNums[(int)ADC.ReadingTypes.RH];
+                    tracker.peakRHTime = DateTime.Now;
                 }
 
             }
