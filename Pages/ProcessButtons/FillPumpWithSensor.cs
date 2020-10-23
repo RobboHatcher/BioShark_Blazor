@@ -12,7 +12,7 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
         }
 
 
-        public async void StartProcess(){
+        public async void StartProcess(bool fromCycle){
             
             // Don't start if we are already full
 
@@ -24,6 +24,9 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
                 machine.FillSensorSwitch += EndProcess;
                 await machine.FillTank();
             }
+        }
+        public void StartProcess(){
+            StartProcess(true);
         }
 
         public void EndProcess(){

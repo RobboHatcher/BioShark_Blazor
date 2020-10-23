@@ -13,7 +13,12 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
         private Machine machine; 
         private SummaryTracker tracker;
         private ADC adc;
+        private bool initialMassBuffer = false;
+        public double StartMass = 0;
+        private bool _fromCycle;
 
+
+        public DateTime OffTimeStart;
 
         public bool IsInDischarge{
             set{
@@ -32,13 +37,9 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
         }
 
 
-        public void StartProcess(){
+        public void StartProcess(bool fromCycle){
             isRunning = true;
-            machine.TurnOn((int)Machine.OutputPins.Mist);
-            machine.TurnOn((int)Machine.OutputPins.Blower);
-            machine.TurnOn((int)Machine.OutputPins.Heat);
-            machine.TurnOn((int)Machine.OutputPins.Distribution);
-            machine.TurnOn((int)Machine.OutputPins.MistFan);
+            _fromCycle = fromCycle;
             RunPumpRunChange += EndProcess;
             machine.FillSensorSwitch += RunPumpAlgorithm;
             Task.Run(() => { RunPumpAlgorithm();});
@@ -46,15 +47,37 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
             // Loop; until turned off, keep run pump on
         }
 
+        public void StartProcess() {
+            StartProcess(true);
+        }
+
         private void RunPumpAlgorithm(){
             machine.TurnOn((int)Machine.OutputPins.RunPump);
+
             while(isRunning){
                 if(machine.IsLevelSensorOn()){
                     Thread.Sleep(100);
                     if(machine.IsLevelSensorOn() && machine.IsOn((int)Machine.OutputPins.RunPump)){
                         machine.TurnOff((int)Machine.OutputPins.RunPump);
+                        if(initialMassBuffer) {OffTimeStart = DateTime.Now;}
                     }
-                }
+                    else if (!machine.IsOn((int)Machine.OutputPins.RunPump) && initialMassBuffer)
+                    {
+                        // After 3 seconds of being off, record the starting mass.
+                        if(DateTime.Now.Subtract(OffTimeStart) > TimeSpan.FromSeconds(3)){
+                            StartMass = adc.ScaledNums[(int)ADC.ReadingTypes.Mass];
+                            if(_fromCycle){
+                                machine.TurnOn((int)Machine.OutputPins.Mist);
+                                machine.TurnOn((int)Machine.OutputPins.Blower);
+                                machine.TurnOn((int)Machine.OutputPins.Heat);
+                                machine.TurnOn((int)Machine.OutputPins.Distribution);
+                                machine.TurnOn((int)Machine.OutputPins.MistFan);
+                            }
+                            initialMassBuffer = false;
+                        }
+
+                    }
+                } 
                 
                 else 
                 {
@@ -72,7 +95,6 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
                     tracker.peakRH = adc.ScaledNums[(int)ADC.ReadingTypes.RH];
                     tracker.peakRHTime = DateTime.Now;
                 }
-
             }
         }
 

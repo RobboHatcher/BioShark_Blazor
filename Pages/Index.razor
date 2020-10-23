@@ -57,7 +57,7 @@
                 <td style="padding:10px"><button class="@systemButtonStyle[(int)OutputPins.Distribution]" @onclick="@(()=>PressSensorButton((int)OutputPins.Distribution))">Distribution Fan</button></td> 
             </tr>
             <tr>
-                <td style="padding:10px"><button class="@systemButtonStyle[(int)OutputPins.RunPump]" @onclick="@(()=>PressSensorButton((int)OutputPins.RunPump))" disabled>Run Pump</button></td>
+                <td style="padding:10px"><button class="@systemButtonStyle[(int)OutputPins.RunPump]" @onclick="@(()=>PressSensorButton((int)OutputPins.RunPump))" >Run Pump</button></td>
                 <td style="padding:10px"><button class="@systemButtonStyle[(int)OutputPins.HRCat]" @onclick="@(()=>PressSensorButton((int)OutputPins.HRCat))">HRCat Fan</button></td> 
             </tr>
             <tr>
@@ -75,7 +75,7 @@
         <div class="col-lg-4 text-center">
             <h3>Automatic Procedures</h3>
              <table class="col-lg">
-                <tr style="padding:10px"><button class="@processButtonStyle[processController.runPump]" @onclick="@(()=>ProcessToggle(processController.runPump))">Run Pump w/ Auto-Off</button></tr>
+                <tr style="padding:10px"><button class="@processButtonStyle[processController.runPump]" @onclick="@(()=>ProcessToggle(processController.runPump, false))">Run Pump w/ Auto-Off</button></tr>
                 <tr style="padding:10px"><button class="@processButtonStyle[processController.lowRangeOscillator]" @onclick="@(()=>ProcessToggle(processController.lowRangeOscillator))">LR Oscillator</button></tr>
                 <tr style="padding:10px"><button class="@processButtonStyle[processController.drainPump]" @onclick="@(()=>ProcessToggle(processController.drainPump))">Drain Pump w/ Auto-Off</button></tr>
                 <tr style="padding:10px"><button class="@processButtonStyle[processController.fillPump]" @onclick="@(()=>ProcessToggle(processController.fillPump))">Fill Pump</button></tr>
@@ -159,7 +159,21 @@
         UpdateButtonStyles();
     }
 
+    private void ProcessToggle( IProcessButton button, bool fromCycle)
+    {
+        
+        if(!button.GetProcessState())
+        {
+            button.StartProcess(fromCycle);
+        }
+        else button.EndProcess();
+
+        // Additionally, update the buttons with their classes.
+        UpdateButtonStyles();
+    }
+
     private void UpdateTimeLeft() {
+        processController.autoCycle.UpdateEstTime();
         cycleTimeLeft = processController.autoCycle.estTimeLeft;
         TimeEnd = DateTime.Now.Add(cycleTimeLeft);
         Task.Run(async()=> await InvokeAsync(()=>this.StateHasChanged()));

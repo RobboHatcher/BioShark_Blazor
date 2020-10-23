@@ -33,7 +33,7 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
             adc = _adc;
         }
     
-        public void StartProcess(){
+        public void StartProcess(bool fromCycle){
             Console.WriteLine(isRunning);
             if(!isRunning){
                 isRunning = true;
@@ -43,10 +43,12 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
                     while(!isTankEmpty() && isRunning) {}
                 });
             }
-        
-
-
         }
+
+        public void StartProcess(){
+            StartProcess(true);
+        }
+        
         public void EndProcess(){
             if(isRunning){
                 isRunning = false;

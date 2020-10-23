@@ -41,7 +41,7 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
 
         }
 
-        public void StartProcess(){
+        public void StartProcess(bool fromCycle){
 
 
 
@@ -50,6 +50,10 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
             machine.TurnOn((int)Machine.OutputPins.LRCat);
             
             RunCycle();
+        }
+
+        public void StartProcess(){
+            StartProcess(true);
         }
 
         public void EndProcess(){
@@ -128,15 +132,16 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
             tracker.startTime = cycleStart;
 
             machine.FillSensorSwitch -= StartDischarge;
-            StartMass = adc.ScaledNums[(int)ADC.ReadingTypes.Mass];
+            
             Console.WriteLine("Discharging... Start mass @ " + Math.Round(StartMass,2));
             double TargetMass = machine.targetMass;
 
-            cycleProcesses[(int)processEnum.RunPump].StartProcess();
+            cycleProcesses[(int)processEnum.RunPump].StartProcess(true);
 
             
 
             await Task.Run(()=> { 
+                StartMass = ((RunPumpAutoTrigger)(cycleProcesses[(int)processEnum.RunPump])).StartMass;
                 while(MassDischarged < TargetMass && isRunning){
                     MassDischarged = StartMass - adc.ScaledNums[(int)ADC.ReadingTypes.Mass];
                     Thread.Sleep(500);
@@ -198,6 +203,7 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
             machine.TurnOff((int)Machine.OutputPins.Mist);
             machine.TurnOff((int)Machine.OutputPins.MistFan);
             
+            machine.TurnOn((int)Machine.OutputPins.Cat);
             cycleProcesses[(int)processEnum.LROsc].StartProcess();
             while(((LROscillator)cycleProcesses[(int)processEnum.LROsc]).isRunning){ Thread.Sleep(1000); }
 

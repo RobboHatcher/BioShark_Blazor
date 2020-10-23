@@ -12,23 +12,25 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
         private ADC adc;
         private int PeakCtr = 0;
         private bool safeToEnter = false;
-        private double MaxVal = 0;
+        public double MaxVal = 0;
         public LROscillator(Machine _machine, ADC _adc) {
             machine = _machine;
             adc = _adc;
 
         }
 
-        public void StartProcess(){
+        public void StartProcess(bool fromCycle){
 
             isRunning = true;
-            machine.TurnOn((int)Machine.OutputPins.Cat);
+            
             machine.TurnOn((int)Machine.OutputPins.LRCat);
                 // Every quarter second: check for safe to enter
             do{ // Wait allow the cycle to catalyze until less than LROscStart (normally 5 ppm HPHR)
                 Thread.Sleep(500);
             } while (adc.ScaledNums[(int)ADC.ReadingTypes.HPHR] > Constants.LROscStart);
-            machine.TurnOff((int)Machine.OutputPins.Distribution);
+            if(!Constants.distFanOnDuringOsci)
+                machine.TurnOff((int)Machine.OutputPins.Distribution);
+
             Task.Run(()=>{
                 
                 while(!safeToEnter){
@@ -61,6 +63,10 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
                 }
             });
 
+        }
+
+        public void StartProcess(){
+            StartProcess(true);
         }
         public void EndProcess(){
             isRunning = false;

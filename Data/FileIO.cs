@@ -25,7 +25,7 @@ namespace BioShark_Blazor.Data{
             string dataFolder = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)+"/BioShark Data/";
             writer = new StreamWriter(dataFolder + GetMFileName(dataFolder,false));
             writer.WriteLine("Time,Mass,HPHR,HPLR,Temp,RH,MassDischarged,Mist,MistFan,RunPump,FillPump,DistFan,HRCat,LRCat,"+
-                "Sidekick,DrainPump,Blower,Heater,Catalyst,FillStep,DischargeStep,AerationStep");
+                "Sidekick,DrainPump,Blower,Heater,Catalyst,FillStep,DischargeStep,AerationStep,MaxVal");
             PeriodicFileWriter.Enabled = true;
             PeriodicFileWriter.Elapsed += WriteToFile;
             PeriodicFileWriter.AutoReset = true;
@@ -35,7 +35,7 @@ namespace BioShark_Blazor.Data{
 
         private void StopFileWriter(){
             writer.WriteLine("Summary");
-            writer.WriteLine("")
+            writer.WriteLine("");
             writer.WriteLine(controller.tracker.SummaryString());
 
             PeriodicFileWriter.Stop();
@@ -103,6 +103,7 @@ namespace BioShark_Blazor.Data{
                 machine.IsOn((int)Machine.OutputPins.Distribution).ToString() + ',' +
                 machine.IsOn((int)Machine.OutputPins.HRCat).ToString() + ',' +
                 machine.IsOn((int)Machine.OutputPins.LRCat).ToString() + ',' +
+                controller.lowRangeOscillator.MaxVal + ',' +
                 machine.IsOn((int)Machine.OutputPins.Sidekick).ToString() + ',' +
                 machine.IsOn((int)Machine.OutputPins.Drainpump).ToString() + ',' +
                 machine.IsOn((int)Machine.OutputPins.Blower).ToString() + ',' +
