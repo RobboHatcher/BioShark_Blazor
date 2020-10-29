@@ -13,7 +13,7 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
         private Machine machine; 
         private SummaryTracker tracker;
         private ADC adc;
-        private bool initialMassBuffer = false;
+        private bool initialMassBuffer = true;
         public double StartMass = 0;
         private bool _fromCycle;
 
@@ -40,8 +40,8 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
         public void StartProcess(bool fromCycle){
             isRunning = true;
             _fromCycle = fromCycle;
+            Console.WriteLine("From Cycle: " + _fromCycle);
             RunPumpRunChange += EndProcess;
-            machine.FillSensorSwitch += RunPumpAlgorithm;
             Task.Run(() => { RunPumpAlgorithm();});
 
             // Loop; until turned off, keep run pump on
@@ -57,16 +57,22 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
             while(isRunning){
                 if(machine.IsLevelSensorOn()){
                     Thread.Sleep(100);
-                    if(machine.IsLevelSensorOn() && machine.IsOn((int)Machine.OutputPins.RunPump)){
+                    if(machine.IsOn((int)Machine.OutputPins.RunPump)){
                         machine.TurnOff((int)Machine.OutputPins.RunPump);
-                        if(initialMassBuffer) {OffTimeStart = DateTime.Now;}
+                        if(initialMassBuffer) {
+                            OffTimeStart = DateTime.Now;
+                            Console.WriteLine(OffTimeStart);
+                        }
                     }
-                    else if (!machine.IsOn((int)Machine.OutputPins.RunPump) && initialMassBuffer)
-                    {
-                        // After 3 seconds of being off, record the starting mass.
-                        if(DateTime.Now.Subtract(OffTimeStart) > TimeSpan.FromSeconds(3)){
+                    else if (!machine.IsOn((int)Machine.OutputPins.RunPump) && initialMassBuffer){
+                        Console.WriteLine("Checking runpump time off... " );
+                        // More than 3 seconds have passed
+
+                        if(TimeSpan.Compare(DateTime.Now.Subtract(OffTimeStart), TimeSpan.FromSeconds(Constants.SecondsForRunPumpWait)) > 0){
+                            Console.WriteLine(Constants.SecondsForRunPumpWait + " seconds passed");
                             StartMass = adc.ScaledNums[(int)ADC.ReadingTypes.Mass];
                             if(_fromCycle){
+                                Console.WriteLine("Turning on misting...");
                                 machine.TurnOn((int)Machine.OutputPins.Mist);
                                 machine.TurnOn((int)Machine.OutputPins.Blower);
                                 machine.TurnOn((int)Machine.OutputPins.Heat);
@@ -75,14 +81,19 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
                             }
                             initialMassBuffer = false;
                         }
-
                     }
                 } 
-                
+
                 else 
                 {
                     if(!machine.IsOn((int)Machine.OutputPins.RunPump)){
                         machine.TurnOn((int)Machine.OutputPins.RunPump);
+                        if(initialMassBuffer)
+                        {
+                        // After 3 seconds of being off, record the starting mass.
+                            
+
+                        }
                     }
                 }
 

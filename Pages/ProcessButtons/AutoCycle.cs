@@ -141,8 +141,11 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
             
 
             await Task.Run(()=> { 
+                // Wait until the run pump saves the start mass
+                while(((RunPumpAutoTrigger)(cycleProcesses[(int)processEnum.RunPump])).StartMass <= 0){} 
+                
                 StartMass = ((RunPumpAutoTrigger)(cycleProcesses[(int)processEnum.RunPump])).StartMass;
-                while(MassDischarged < TargetMass && isRunning){
+                while(MassDischarged < TargetMass && isRunning && StartMass > 0){
                     MassDischarged = StartMass - adc.ScaledNums[(int)ADC.ReadingTypes.Mass];
                     Thread.Sleep(500);
                 } // Wait until mass above target
