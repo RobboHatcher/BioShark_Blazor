@@ -75,7 +75,7 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
             tracker.endRH = adc.ScaledNums[(int)ADC.ReadingTypes.RH];
             tracker.endTemp = adc.ScaledNums[(int)ADC.ReadingTypes.Temp];
             tracker.endTime = DateTime.Now;
-            
+            FillSensorSwitch -= StartDischarge;
             machine.TurnAllOff();
             cycleStopEvent?.Invoke();
             secondDrainCompleteFlag = false;

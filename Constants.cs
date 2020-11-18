@@ -23,6 +23,10 @@ namespace BioShark_Blazor{
         // Extra Mass factor for safety net in discharge step
         public const double ExtraMassFactor = 1.5;
 
+        // How often we want the file to update its cycle; allows to adjust num of file writes
+        // and the amount of memory associated with the file.
+        public const int PeriodicFileWriteSeconds = 15;
+
         public const int SecondsForRunPumpWait = 6;
         
         public const double OscillationConstant = 0.95;

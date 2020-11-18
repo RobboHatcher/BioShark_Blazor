@@ -6,44 +6,92 @@ using System;
 namespace BioShark_Blazor.Data{
 
     public class FileIO{
+
+        // This class had three approach options:
+        // 1. Open, write, close a file for every data point
+        // 2. Save an array for all of the data points of a cycle, then write the entire array to the file
+        // 3. Open, write, close for a set amount of data points.
         private Machine machine;
         private ADC adc;
         private ProcessController controller;
         private StreamWriter writer;
         System.Timers.Timer PeriodicFileWriter;
+
+        private int count = 0;
+        private string[] dataLines = new string[Constants.PeriodicFileWriteSeconds];
+        
+
         public void Initialize(Machine _machine, ADC _adc, ProcessController _controller){
             machine = _machine;
             adc = _adc;
             controller = _controller;
+
+            // Start Event triggers in autoCycle.startProcess()
+            // Stop event triggers in autoCycle.endProcess()
             _controller.autoCycle.cycleStartEvent += StartFileWriter;
             _controller.autoCycle.cycleStopEvent += StopFileWriter;
         }
 
         private void StartFileWriter(){
-            
+            // Sample every second.
             PeriodicFileWriter = new System.Timers.Timer(1000);
+            
             string dataFolder = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)+"/BioShark Data/";
+            // Ensure the folder is there; if it isn't, create it.
+            if(!File.Exists(dataFolder)){
+                Directory.CreateDirectory(dataFolder);
+            }
+
+            // Create a file writer.
             writer = new StreamWriter(dataFolder + GetMFileName(dataFolder,false));
             writer.WriteLine("Time,Mass,HPHR,HPLR,Temp,RH,MassDischarged,Mist,MistFan,RunPump,FillPump,DistFan,HRCat,LRCat,"+
                 "Sidekick,DrainPump,Blower,Heater,Catalyst,FillStep,DischargeStep,AerationStep,MaxVal");
+
+            // Now, periodically write to a file.
             PeriodicFileWriter.Enabled = true;
-            PeriodicFileWriter.Elapsed += WriteToFile;
+            PeriodicFileWriter.Elapsed += SaveDataPoint;
             PeriodicFileWriter.AutoReset = true;
             PeriodicFileWriter.Start();
         }
 
 
         private void StopFileWriter(){
+            WriteDataLinesToFile();
+
             writer.WriteLine("Summary");
             writer.WriteLine("");
             writer.WriteLine(controller.tracker.SummaryString());
-
+            
             PeriodicFileWriter.Stop();
             PeriodicFileWriter.Close();
             writer.Close();
             writer.Dispose();
 
         }
+
+        private void SaveDataPoint(object o, System.Timers.ElapsedEventArgs e){
+            try{
+                dataLines[count] = FormattedDataLine();
+            }
+            catch(FormatException ex){
+                // The data line could not be pulled; one or more data points were absent 
+                Console.WriteLine("File writing problem.");
+
+                // Go ahead and just write the date for a line.
+                dataLines[count] = DateTime.Now.ToString("HH:mm:ss");
+            }
+
+            if(count < Constants.PeriodicFileWriteSeconds - 1 )
+                count++;
+
+            else{
+                // If we hit the limit or we stop the file writer, we want to write the data lines to the file.
+                WriteDataLinesToFile();
+            }
+
+
+        }
+
 
         private string GetMFileName(string DataFolder, bool isExtern)
         {
@@ -60,17 +108,19 @@ namespace BioShark_Blazor.Data{
             {
                 string fileName = I;
                 Console.WriteLine(fileName);
-                if (fileName.Substring(0,10) == currDate.Substring(0,10))
+                if (fileName.Substring(0,10) == currDate)
                 {
-                    int index = Convert.ToInt32(fileName.Substring(11, 1));
-                    if ( index > Maxdex)
+                    // Index of period: fileName.IndexOf('.')
+                    // Length of substring: index of period - 11
+                    int index = Convert.ToInt32(fileName.Substring(11, fileName.IndexOf('.') - 11));
+                    if ( index >= Maxdex)
                     {
-                        Maxdex = index;
+                        // Set max index to one more than index.
+                        Maxdex = index + 1;
                     }
                 }
             }
 
-            Maxdex += 1;
 
             //Ensures that, if we move the files from local to external, there are no filename conflicts
             //Fail case: Local Cycle run, then files moved, then local cycle run again, then files moved again without renaming/removing them from the drive.
@@ -83,8 +133,11 @@ namespace BioShark_Blazor.Data{
             return filename;
         }
 
-        private void WriteToFile(object o, System.Timers.ElapsedEventArgs e){
-            writer.WriteLine(FormattedDataLine());
+        private void WriteDataLinesToFile(){
+            for(int i = 0; i < count; i++){
+                writer.WriteLine(dataLines[i]);
+            }
+            count = 0;
         }
 
         private string FormattedDataLine(){

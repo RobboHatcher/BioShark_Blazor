@@ -68,6 +68,7 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
         public void StartProcess(){
             StartProcess(true);
         }
+
         public void EndProcess(){
             isRunning = false;
             safeToEnter = true;
@@ -90,7 +91,10 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
                 
             }
 
-            else safeToEnter = false;
+            else if(isRunning){
+                
+                safeToEnter = false;
+            }
         }
         public bool GetProcessState(){
             return isRunning;

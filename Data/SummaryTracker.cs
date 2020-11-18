@@ -47,7 +47,7 @@ namespace BioShark_Blazor.Data
             string dataLine = "";
             dataLine += machineID.ToString() + ',' + cycleID.ToString() + ',' + cycleDate.ToString(DateFormat) + ',' + startTime.ToString(TimeFormat) + ','
                 + userID + ',' + roomID + ',' + roomVolume.ToString() + ',' + begMass.ToString() + ',' + endMass.ToString() + ',' + massChange.ToString()
-                + ',' + massDisch.ToString() + ',' + dischTime.ToString(TimeFormat) + ',' + cycleLen.ToString(TimeFormat) + ',' + AvgMistRate.ToString()
+                + ',' + massDisch.ToString() + ',' + dischTime.ToString() + ',' + cycleLen.ToString() + ',' + AvgMistRate.ToString()
                 + ',' + peakPPM.ToString() + ',' + peakPPMDataPoint.ToString() + ',' + peakPPMTime.ToString(TimeFormat) + ',' + begRH.ToString() + ','
                 + peakRH.ToString() + ',' + peakRHDataPoint.ToString() + ',' + peakRHTime.ToString(TimeFormat) + ',' + endRH.ToString() + ',' + begTemp.ToString()
                 + ',' + peakTemp.ToString() + ',' + peakTempDataPoint.ToString() + ',' + peakTempTime.ToString(TimeFormat) + ',' + endTemp.ToString() + ',' + endTime.ToString(TimeFormat);
