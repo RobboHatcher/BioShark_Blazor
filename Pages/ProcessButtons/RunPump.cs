@@ -66,7 +66,6 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
                     }
                     else if (!machine.IsOn((int)Machine.OutputPins.RunPump) && initialMassBuffer){
                         Console.WriteLine("Checking runpump time off... " );
-                        // More than 3 seconds have passed
 
                         if(TimeSpan.Compare(DateTime.Now.Subtract(OffTimeStart), TimeSpan.FromSeconds(Constants.SecondsForRunPumpWait)) > 0){
                             Console.WriteLine(Constants.SecondsForRunPumpWait + " seconds passed");
@@ -88,12 +87,6 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
                 {
                     if(!machine.IsOn((int)Machine.OutputPins.RunPump)){
                         machine.TurnOn((int)Machine.OutputPins.RunPump);
-                        if(initialMassBuffer)
-                        {
-                        // After 3 seconds of being off, record the starting mass.
-                            
-
-                        }
                     }
                 }
 
@@ -111,6 +104,7 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
 
         public void EndProcess(){
             isRunning = false;
+            initialMassBuffer = true;
             machine.TurnOff((int)Machine.OutputPins.Mist);
             machine.TurnOff((int)Machine.OutputPins.Blower);
             machine.TurnOff((int)Machine.OutputPins.Heat);
