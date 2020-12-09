@@ -13,7 +13,7 @@ namespace BioShark_Blazor{
         // Amount of time the sidekick runs before starting the cycle
         public const int SidekickMS = 10000;
 
-        public const double LROscStart = 5.0;        
+        public const double LROscStart = 8.0;        
         // Used in the calculation of the target mass
         public const float HPMassFraction6Log = 2.2f;
         public const float targetMassConst = .35f;

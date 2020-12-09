@@ -56,16 +56,26 @@ namespace BioShark_Blazor.Data{
 
 
         private void StopFileWriter(){
-            WriteDataLinesToFile();
-
-            writer.WriteLine("Summary");
-            writer.WriteLine("");
-            writer.WriteLine(controller.tracker.SummaryString());
+           
             
-            PeriodicFileWriter.Stop();
-            PeriodicFileWriter.Close();
-            writer.Close();
-            writer.Dispose();
+            // If we have a currently open file writer
+            if(writer != null){
+                if(writer.BaseStream != null){
+                    WriteDataLinesToFile();
+                    writer.WriteLine("Summary");
+                    writer.WriteLine("");
+                    writer.WriteLine(controller.tracker.SummaryString());
+                }
+                try{
+                    PeriodicFileWriter.Stop();
+                    PeriodicFileWriter.Close();
+                    writer.Close();
+                    writer.Dispose();
+                }
+                catch(Exception ex){
+                    Console.WriteLine("File Writer already closed.");
+                }
+            }
 
         }
 

@@ -44,7 +44,6 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
         public void StartProcess(bool fromCycle){
 
 
-
             cycleStartEvent?.Invoke();
             isRunning = true;
             machine.TurnOn((int)Machine.OutputPins.LRCat);
@@ -79,7 +78,6 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
             machine.TurnAllOff();
             cycleStopEvent?.Invoke();
             secondDrainCompleteFlag = false;
-            cycleProcesses[2].StartProcess(); //Start a drain 
         }
 
         public void UpdateEstTime(){
@@ -174,9 +172,11 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
 
         private void StartHold(){
             Console.WriteLine("Hold Step: " + DateTime.Now);
+            machine.TurnOff((int)Machine.OutputPins.Mister);
+            machine.TurnOff((int)Machine.OutputPins.Mist);
             machine.TurnOn((int)Machine.OutputPins.Distribution);
             machine.TurnOn((int)Machine.OutputPins.Blower);
-            cycleProcesses[(int)processEnum.DrainPump].StartProcess();
+            Task.Run(()=> { cycleProcesses[(int)processEnum.DrainPump].StartProcess();});
             Task.Run(()=>{
                 while((DateTime.Now.Subtract(cycleStart) < TimeSpan.FromMinutes(10))){
                     Thread.Sleep(1000);

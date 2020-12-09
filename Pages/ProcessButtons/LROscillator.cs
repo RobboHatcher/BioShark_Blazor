@@ -33,7 +33,7 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
 
             Task.Run(()=>{
                 
-                while(!safeToEnter){
+                while(!safeToEnter && isRunning){
                     if(adc.ScaledNums[(int)ADC.ReadingTypes.HPLR] > Constants.OscillationConstant)
                     {
                         if(!machine.IsOn((int)Machine.OutputPins.LRCat))
@@ -71,9 +71,7 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
 
         public void EndProcess(){
             isRunning = false;
-            safeToEnter = true;
             Thread.Sleep(1000);
-            safeToEnter = false;
             machine.TurnOn((int)Machine.OutputPins.LRCat);
         }
 
@@ -85,7 +83,7 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
         }
 
         private void SafetyCheck() {
-            if(PeakCtr >= 3){
+            if(PeakCtr >= 3 || isRunning == false){
                 safeToEnter = true;
                 EndProcess();
                 

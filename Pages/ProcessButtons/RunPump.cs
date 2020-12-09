@@ -55,8 +55,11 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
             machine.TurnOn((int)Machine.OutputPins.RunPump);
 
             while(isRunning){
+                // If water is up to level sensor
                 if(machine.IsLevelSensorOn()){
                     Thread.Sleep(100);
+
+                    // If the run pump is On
                     if(machine.IsOn((int)Machine.OutputPins.RunPump)){
                         machine.TurnOff((int)Machine.OutputPins.RunPump);
                         if(initialMassBuffer) {
@@ -66,7 +69,6 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
                     }
                     else if (!machine.IsOn((int)Machine.OutputPins.RunPump) && initialMassBuffer){
                         Console.WriteLine("Checking runpump time off... " );
-
                         if(TimeSpan.Compare(DateTime.Now.Subtract(OffTimeStart), TimeSpan.FromSeconds(Constants.SecondsForRunPumpWait)) > 0){
                             Console.WriteLine(Constants.SecondsForRunPumpWait + " seconds passed");
                             StartMass = adc.ScaledNums[(int)ADC.ReadingTypes.Mass];
