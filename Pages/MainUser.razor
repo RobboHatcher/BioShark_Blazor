@@ -1,0 +1,37 @@
+<!--Blazor Index Page-->
+@page "/main"
+
+<!--Using statements necessary before html for inline C# code-->
+@using System;
+@using BioShark_Blazor.Data;
+@using static BioShark_Blazor.Data.Machine;
+@using BioShark_Blazor.Pages.ProcessButtons;
+@using BioShark_Blazor.Pages.Components;
+
+<!--Singular objects used throughout the webpage are injected.
+    Look at Program.cs and Startup.cs for their implementation.-->
+@inject Machine _machine
+@inject ADC _adc
+@inject FileIO _fileWriter
+
+<h1>BioShark Control Panel</h1>
+<div class="container-fluid">
+    <div class="row text-center">
+        <!--Separate component for listing readings because we use that in different webpages-->
+        <ReadingsComponent/>
+        <!--Buttons for automatic procedures-->
+        <div class="col-lg-8 text-center">
+            <h3>Automatic Procedures</h3>
+             <table class="col-lg">
+                <tr style="padding:10px"><button class="@processButtonStyle[processController.autoCycle]" @onclick="@(()=>processController.autoCycle.StartProcess())">Auto Cycle</button></tr>
+                <tr style="padding:10px"><button class="btn btn-danger btn-block" @onclick="@(()=>EmergencyStop())">Emergency Stop Cycle</button></tr>
+                <tr style="padding:10px">@Math.Round(MassDischarged,2).ToString() Grams Discharged</tr>
+                <tr style="padding:10px">Estimated cycle end time: @TimeEnd.ToString(@"hh\:mm\:ss tt")</tr>
+             </table>
+        </div>
+    </div>
+</div>
+
+@code{
+    
+}
