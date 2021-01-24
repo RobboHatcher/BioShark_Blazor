@@ -172,7 +172,6 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
 
         private void StartHold(){
             Console.WriteLine("Hold Step: " + DateTime.Now);
-            machine.TurnOff((int)Machine.OutputPins.Mister);
             machine.TurnOff((int)Machine.OutputPins.Mist);
             machine.TurnOn((int)Machine.OutputPins.Distribution);
             machine.TurnOn((int)Machine.OutputPins.Blower);

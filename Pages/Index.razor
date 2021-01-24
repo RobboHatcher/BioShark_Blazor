@@ -91,15 +91,15 @@
 </div>
 
 @code{
+    
     private Dictionary<int,string> systemButtonStyle;
-
-    private Dictionary<IProcessButton,string> processButtonStyle;
-    ProcessController processController;
+    public static Dictionary<IProcessButton,string> processButtonStyle = null;
+    public static ProcessController processController = null;
     private enum ButtonTypes {runPumpButton,LROButton,DrainButton,FillButton,AutoCycle}
     public static int roomSize;
-    public DateTime TimeEnd = DateTime.Now;
-    public TimeSpan cycleTimeLeft = new TimeSpan(0,0,0);
-    public double MassDischarged = 0;
+    public static DateTime TimeEnd = DateTime.Now;
+    public static TimeSpan cycleTimeLeft = new TimeSpan(0,0,0);
+    public static double MassDischarged = 0;
     protected override void OnInitialized()
     {
         // OnInitialized needs to be overridden from the default page class to
@@ -107,21 +107,22 @@
 
         base.OnInitialized();
         systemButtonStyle = new Dictionary<int,string>();
-        
-        processController = new ProcessController(_machine, _adc);
-        processButtonStyle = new Dictionary<IProcessButton, string>();
-        processButtonStyle.Add(processController.runPump, processController.runPump.GetButtonClass());
-        processButtonStyle.Add(processController.lowRangeOscillator, processController.lowRangeOscillator.GetButtonClass());
-        processButtonStyle.Add(processController.drainPump, processController.runPump.GetButtonClass());
-        processButtonStyle.Add(processController.fillPump, processController.runPump.GetButtonClass());
-        processButtonStyle.Add(processController.autoCycle, processController.runPump.GetButtonClass());
+        if(processController == null){
+            processController = new ProcessController(_machine, _adc);
+            processButtonStyle = new Dictionary<IProcessButton, string>();
+            processButtonStyle.Add(processController.runPump, processController.runPump.GetButtonClass());
+            processButtonStyle.Add(processController.lowRangeOscillator, processController.lowRangeOscillator.GetButtonClass());
+            processButtonStyle.Add(processController.drainPump, processController.runPump.GetButtonClass());
+            processButtonStyle.Add(processController.fillPump, processController.runPump.GetButtonClass());
+            processButtonStyle.Add(processController.autoCycle, processController.runPump.GetButtonClass());
 
-        _machine.ButtonStyleTrigger += UpdateButtonStyles; // This causes all pin changes to trigger page updates.
-        _fileWriter.Initialize(_machine, _adc, processController);
-        
-        _adc.OnAverageValues += UpdateTimeLeft;
-        UpdateButtonStyles();
-        UpdateTimeLeft();
+            _machine.ButtonStyleTrigger += UpdateButtonStyles; // This causes all pin changes to trigger page updates.
+            _fileWriter.Initialize(_machine, _adc, processController);
+            
+            _adc.OnAverageValues += UpdateTimeLeft;
+            UpdateButtonStyles();
+            UpdateTimeLeft();
+        }
     }
 
 
@@ -214,5 +215,6 @@
     private void UpdateProcessStyle(IProcessButton process){
         processButtonStyle[process] = process.GetButtonClass();
     }
+    
 
 }

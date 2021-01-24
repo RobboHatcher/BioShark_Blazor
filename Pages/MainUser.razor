@@ -7,6 +7,8 @@
 @using static BioShark_Blazor.Data.Machine;
 @using BioShark_Blazor.Pages.ProcessButtons;
 @using BioShark_Blazor.Pages.Components;
+@using BioShark_Blazor.Pages;
+
 
 <!--Singular objects used throughout the webpage are injected.
     Look at Program.cs and Startup.cs for their implementation.-->
@@ -23,15 +25,64 @@
         <div class="col-lg-8 text-center">
             <h3>Automatic Procedures</h3>
              <table class="col-lg">
-                <tr style="padding:10px"><button class="@processButtonStyle[processController.autoCycle]" @onclick="@(()=>processController.autoCycle.StartProcess())">Auto Cycle</button></tr>
+                <tr style="padding:10px"><button class="@Index.processButtonStyle[Index.processController.autoCycle]" @onclick="@(()=>Index.processController.autoCycle.StartProcess())">Auto Cycle</button></tr>
                 <tr style="padding:10px"><button class="btn btn-danger btn-block" @onclick="@(()=>EmergencyStop())">Emergency Stop Cycle</button></tr>
-                <tr style="padding:10px">@Math.Round(MassDischarged,2).ToString() Grams Discharged</tr>
-                <tr style="padding:10px">Estimated cycle end time: @TimeEnd.ToString(@"hh\:mm\:ss tt")</tr>
+                <tr style="padding:10px">@Math.Round(Index.MassDischarged,2).ToString() Grams Discharged</tr>
+                <tr style="padding:10px">Estimated cycle end time: @Index.TimeEnd.ToString(@"hh\:mm\:ss tt")</tr>
              </table>
         </div>
     </div>
 </div>
 
 @code{
-    
+    protected override void OnInitialized(){
+        
+        base.OnInitialized();
+
+        // These statements take place in case this is the first place visited, rather than Index.razor
+        if(Index.processController == null){
+            Index.processController = new ProcessController(_machine, _adc);
+            Index.processButtonStyle = new Dictionary<IProcessButton, string>();
+            Index.processButtonStyle.Add(Index.processController.runPump, Index.processController.runPump.GetButtonClass());
+            Index.processButtonStyle.Add(Index.processController.lowRangeOscillator, Index.processController.lowRangeOscillator.GetButtonClass());
+            Index.processButtonStyle.Add(Index.processController.drainPump, Index.processController.runPump.GetButtonClass());
+            Index.processButtonStyle.Add(Index.processController.fillPump, Index.processController.runPump.GetButtonClass());
+            Index.processButtonStyle.Add(Index.processController.autoCycle, Index.processController.runPump.GetButtonClass());
+
+            _machine.ButtonStyleTrigger += UpdateButtonStyles; // This causes all pin changes to trigger page updates.
+             _fileWriter.Initialize(_machine, _adc, Index.processController);
+        
+            _adc.OnAverageValues += UpdateTimeLeft;
+            UpdateButtonStyles();
+            UpdateTimeLeft();
+        }
+    }
+
+    private void UpdateTimeLeft() {
+        Index.processController.autoCycle.UpdateEstTime();
+        Index.cycleTimeLeft = Index.processController.autoCycle.estTimeLeft;
+        Index.TimeEnd = DateTime.Now.Add(Index.cycleTimeLeft);
+        Task.Run(async()=> await InvokeAsync(()=>this.StateHasChanged()));
+    }
+    private void UpdateButtonStyles()
+    {
+        UpdateProcessStyle(Index.processController.runPump);
+        UpdateProcessStyle(Index.processController.lowRangeOscillator);
+        UpdateProcessStyle(Index.processController.fillPump);
+        UpdateProcessStyle(Index.processController.drainPump);
+        UpdateProcessStyle(Index.processController.autoCycle);
+        Index.MassDischarged=Math.Round(Index.processController.autoCycle.MassDischarged, 2);
+        Task.Run(async()=> await InvokeAsync(()=>this.StateHasChanged()));
+    }
+
+    private void UpdateProcessStyle(IProcessButton process){
+        Index.processButtonStyle[process] = process.GetButtonClass();
+    }
+
+    private void EmergencyStop()
+    {
+        // Stop all processes
+        Index.processController.StopAllProcesses();
+        _machine.TurnAllOff();
+    }
 }
