@@ -8,8 +8,13 @@
 <div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
     <ul class="nav flex-column">
         <li class="nav-item px-3">
+            <NavLink class="nav-link" href="main" Match="NavLinkMatch.All">
+                <span class="oi oi-droplet" aria-hidden="true"></span> Main Control
+            </NavLink>
+        </li>
+        <li class="nav-item px-3">
             <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="oi oi-home" aria-hidden="true"></span> Home
+                <span class="oi oi-home" aria-hidden="true"></span> Detailed Control
             </NavLink>
         </li>
         <li class="nav-item px-3">
