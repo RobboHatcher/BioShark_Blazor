@@ -4,6 +4,7 @@
 <!--Using statements necessary before html for inline C# code-->
 @using System;
 @using BioShark_Blazor.Data;
+@using static BioShark_Blazor.Pages.Index;
 @using static BioShark_Blazor.Data.Machine;
 @using BioShark_Blazor.Pages.ProcessButtons;
 @using BioShark_Blazor.Pages.Components;
@@ -25,13 +26,33 @@
              <table class="col-lg">
                 <tr style="padding:10px"><button class="@processButtonStyle[processController.autoCycle]" @onclick="@(()=>processController.autoCycle.StartProcess())">Auto Cycle</button></tr>
                 <tr style="padding:10px"><button class="btn btn-danger btn-block" @onclick="@(()=>EmergencyStop())">Emergency Stop Cycle</button></tr>
-                <tr style="padding:10px">@Math.Round(MassDischarged,2).ToString() Grams Discharged</tr>
+                <tr style="padding:10px">@Math.Round(Index.MassDischarged,2).ToString() Grams Discharged</tr>
                 <tr style="padding:10px">Estimated cycle end time: @TimeEnd.ToString(@"hh\:mm\:ss tt")</tr>
+                <tr>
+                    <td><label>Width (in)</label><InputNumber id="Width Measurement" @bind-Value="roomWidth"/></td>
+                    <td><label>Height (in)</label><InputNumber id="Height Measurement" @bind-Value="roomHeight"/></td>
+                    <td><label>Length (in)</label><InputNumber id="Length Measurement" @bind-Value="roomLength"/></td>
+                </tr>
+                <tr> <button class="btn btn-primary btn-block" @onclick="@(()=>CalculateRoomSize())">Save Values</button></tr>
              </table>
         </div>
+    </div>
+    <div class="row text-center">
+
     </div>
 </div>
 
 @code{
+
+    double roomWidth = 0;
+    double roomHeight = 0;
+    double roomLength = 0;
+
+    void CalculateRoomSize(){
+        Index.roomSize = (int)(roomWidth*roomHeight*roomLength*(Math.Pow(0.0254, 3)));
+    }
+
+
+
     
 }
