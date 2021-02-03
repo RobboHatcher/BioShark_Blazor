@@ -4,6 +4,7 @@ using System.Collections.Generic;
 namespace BioShark_Blazor.Pages.ProcessButtons {
 
     public class ProcessController{
+        // ProcessController Class used to hold all scripted processes. This is utilized by the AutoCycle
         public FillPumpWithSensor fillPump;
         public LROscillator lowRangeOscillator;
         public RunPumpAutoTrigger runPump;

@@ -96,10 +96,12 @@
     public static Dictionary<IProcessButton,string> processButtonStyle = null;
     public static ProcessController processController = null;
     private enum ButtonTypes {runPumpButton,LROButton,DrainButton,FillButton,AutoCycle}
+
     public static int roomSize;
     public static DateTime TimeEnd = DateTime.Now;
     public static TimeSpan cycleTimeLeft = new TimeSpan(0,0,0);
     public static double MassDischarged = 0;
+
     protected override void OnInitialized()
     {
         // OnInitialized needs to be overridden from the default page class to
@@ -112,9 +114,9 @@
             processButtonStyle = new Dictionary<IProcessButton, string>();
             processButtonStyle.Add(processController.runPump, processController.runPump.GetButtonClass());
             processButtonStyle.Add(processController.lowRangeOscillator, processController.lowRangeOscillator.GetButtonClass());
-            processButtonStyle.Add(processController.drainPump, processController.runPump.GetButtonClass());
-            processButtonStyle.Add(processController.fillPump, processController.runPump.GetButtonClass());
-            processButtonStyle.Add(processController.autoCycle, processController.runPump.GetButtonClass());
+            processButtonStyle.Add(processController.drainPump, processController.drainPump.GetButtonClass());
+            processButtonStyle.Add(processController.fillPump, processController.fillPump.GetButtonClass());
+            processButtonStyle.Add(processController.autoCycle, processController.autoCycle.GetButtonClass());
 
             _machine.ButtonStyleTrigger += UpdateButtonStyles; // This causes all pin changes to trigger page updates.
             _fileWriter.Initialize(_machine, _adc, processController);
