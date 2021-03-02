@@ -134,26 +134,7 @@
         Console.WriteLine("Target mass: " + _machine.targetMass);
         UpdateTimeLeft();
     }
-private void CalculateRoomMass()
-    {
-        _machine.targetMass = roomSize * Constants.HPMassFraction6Log / Constants.targetMassConst;
-        Console.WriteLine("Target mass: " + _machine.targetMass);
-        UpdateTimeLeft();
-    }
 
-    private void PressSensorButton(int i)
-    {
-        // Toggles the pin that the button controls.
-        if(_machine.IsOn(i))
-        {
-            _machine.TurnOff(i);
-        }
-
-        else {
-            _machine.TurnOn(i);
-        }
-        
-    }
     private void PressSensorButton(int i)
     {
         // Toggles the pin that the button controls.

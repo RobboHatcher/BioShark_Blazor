@@ -32,6 +32,7 @@
                 <tr style="padding:10px"><button class="btn btn-danger btn-block" @onclick="@(()=>EmergencyStop())">Emergency Stop Cycle</button></tr>
                 <tr style="padding:10px">@Math.Round(Index.MassDischarged,2).ToString() Grams Discharged</tr>
                 <tr style="padding:10px">Estimated cycle end time: @Index.TimeEnd.ToString(@"hh\:mm\:ss tt")</tr>
+                <tr style="padding:10px"><Radzen.Blazor.RadzenProgressBar @bind-Value="@ProgressCount"></Radzen.Blazor.RadzenProgressBar></tr>
              </table>
 
             <h3>Room Configuration</h3>
@@ -50,6 +51,8 @@
 
 @code{
     
+    int ProgressCount = 0;
+
     [XmlAttribute]
     public double roomWidth {get;set;}
     [XmlAttribute]
