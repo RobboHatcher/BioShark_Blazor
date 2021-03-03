@@ -52,7 +52,7 @@
 
 @code{
     
-    int ProgressCount = 0;
+    double ProgressCount = 0;
 
     [XmlAttribute]
     public double roomWidth {get;set;}
@@ -108,6 +108,7 @@
         Index.processController.autoCycle.UpdateEstTime();
         Index.cycleTimeLeft = Index.processController.autoCycle.estTimeLeft;
         Index.TimeEnd = DateTime.Now.Add(Index.cycleTimeLeft);
+
         Task.Run(async()=> await InvokeAsync(()=>this.StateHasChanged()));
     }
     public void UpdateButtonStyles()
@@ -118,6 +119,9 @@
         UpdateProcessStyle(Index.processController.drainPump);
         UpdateProcessStyle(Index.processController.autoCycle);
         Index.MassDischarged=Math.Round(Index.processController.autoCycle.MassDischarged, 2);
+        ProgressCount = Index.processController.autoCycle.cycleProgress();
+
+        Console.WriteLine(ProgressCount + ' ' + Index.processController.autoCycle.cycleProgress());
         Task.Run(async()=> await InvokeAsync(()=>this.StateHasChanged()));
     }
 

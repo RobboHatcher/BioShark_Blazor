@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-
+using System.Linq;
 
 
 namespace BioShark_Blazor.Pages.ProcessButtons {
@@ -13,8 +13,8 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
 
 
         protected enum processEnum {RunPump, LROsc, DrainPump, FillPump}
-
-
+        public enum cycleProgressEnum {STANDBY=0, FILLING=1, DISCHARGING=2,HOLDING=3,AERATING=4, DONE=5 }
+        public cycleProgressEnum currProgress = cycleProgressEnum.STANDBY;
         private Machine machine;
         private ADC adc;
 
@@ -40,7 +40,12 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
             cycleProcesses = _buttons;
             tracker = _tracker;
             adc.OnAverageValues += UpdateEstTime;
+            currProgress = cycleProgressEnum.STANDBY;
+        }
 
+        public double cycleProgress (){
+            var maxProgress = Enum.GetValues(typeof(cycleProgressEnum)).Cast<cycleProgressEnum>().Max();
+            return 100*(int)currProgress / (double)((int)maxProgress);
         }
 
         public void StartProcess(bool fromCycle){
@@ -58,6 +63,7 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
         }
 
         public void EndProcess(){
+            currProgress = cycleProgressEnum.HOLDING;
             try{
                 CycleSideKick.Dispose();
             }
@@ -102,7 +108,7 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
         private void RunCycle(){
             estCycleEnd = DateTime.Now.Add(estTimeLeft);
             machine.TurnOn((int)Machine.OutputPins.Sidekick);
-
+            currProgress = cycleProgressEnum.FILLING;
             
             tracker.roomVolume = BioShark_Blazor.Pages.Index.roomSize;
             tracker.begMass = adc.ScaledNums[(int)ADC.ReadingTypes.Mass];
@@ -128,6 +134,7 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
         }
 
         private async void StartDischarge(){
+            currProgress = cycleProgressEnum.DISCHARGING;
             cycleStart = DateTime.Now; // Save the start time for the hold step
             tracker.startTime = cycleStart;
 
@@ -173,6 +180,7 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
 
 
         private void StartHold(){
+            currProgress = cycleProgressEnum.HOLDING;
             Console.WriteLine("Hold Step: " + DateTime.Now);
             machine.TurnOff((int)Machine.OutputPins.Mist);
             machine.TurnOn((int)Machine.OutputPins.Distribution);
@@ -202,6 +210,7 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
         }
 
         private void StartAeration(){
+            currProgress = cycleProgressEnum.AERATING;
             machine.TurnOff((int)Machine.OutputPins.Blower);
             machine.TurnOff((int)Machine.OutputPins.Heat);
             machine.TurnOff((int)Machine.OutputPins.Mist);
