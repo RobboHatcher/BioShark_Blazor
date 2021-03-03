@@ -33,7 +33,7 @@ namespace BioShark_Blazor{
 
         public const double PeakConstant = 1.0;
 
-        public const bool distFanOnDuringOsci = True;
+        public const bool distFanOnDuringOsci = true;
 
         public const string FileNameFormat = "yyyy-MM-dd";
     }

@@ -92,7 +92,7 @@
 
 @code{
     
-    private Dictionary<int,string> systemButtonStyle;
+    private static Dictionary<int,string> systemButtonStyle;
     public static Dictionary<IProcessButton,string> processButtonStyle = null;
     public static ProcessController processController = null;
     private enum ButtonTypes {runPumpButton,LROButton,DrainButton,FillButton,AutoCycle}
@@ -106,7 +106,7 @@
     {
         // OnInitialized needs to be overridden from the default page class to
         // populate data structures after the page has loaded.
-
+        Console.WriteLine("Initializing Index");
         base.OnInitialized();
         systemButtonStyle = new Dictionary<int,string>();
         if(processController == null){
@@ -127,6 +127,25 @@
         }
     }
 
+    protected override void OnAfterRender(bool firstRender){
+        Console.WriteLine("Page swap...");
+        try{
+            foreach(var d in _machine.ButtonStyleDelegates()){
+                _machine.ButtonStyleTrigger -= (CycleEvent)d;
+            }
+            foreach(var e in _adc.AverageValuesDelegates()){
+                _adc.OnAverageValues -= (Action)e;
+            }
+
+            _machine.ButtonStyleTrigger += UpdateButtonStyles;
+
+            _adc.OnAverageValues += UpdateTimeLeft;
+            
+        }catch(Exception ex){
+            Console.WriteLine("Index not yet initialized");
+        }
+    }
+
 
     private void CalculateRoomMass()
     {
@@ -134,26 +153,7 @@
         Console.WriteLine("Target mass: " + _machine.targetMass);
         UpdateTimeLeft();
     }
-private void CalculateRoomMass()
-    {
-        _machine.targetMass = roomSize * Constants.HPMassFraction6Log / Constants.targetMassConst;
-        Console.WriteLine("Target mass: " + _machine.targetMass);
-        UpdateTimeLeft();
-    }
 
-    private void PressSensorButton(int i)
-    {
-        // Toggles the pin that the button controls.
-        if(_machine.IsOn(i))
-        {
-            _machine.TurnOff(i);
-        }
-
-        else {
-            _machine.TurnOn(i);
-        }
-        
-    }
     private void PressSensorButton(int i)
     {
         // Toggles the pin that the button controls.
@@ -194,11 +194,11 @@ private void CalculateRoomMass()
         UpdateButtonStyles();
     }
 
-    private void UpdateTimeLeft() {
+    public void UpdateTimeLeft() {
         processController.autoCycle.UpdateEstTime();
         cycleTimeLeft = processController.autoCycle.estTimeLeft;
         TimeEnd = DateTime.Now.Add(cycleTimeLeft);
-        Task.Run(async()=> await InvokeAsync(()=>this.StateHasChanged()));
+        Task.Run(async()=> await InvokeAsync(()=>StateHasChanged()));
     }
 
     private void EmergencyStop()
@@ -208,7 +208,7 @@ private void CalculateRoomMass()
         _machine.TurnAllOff();
     }
 
-    private void UpdateButtonStyles()
+    public void UpdateButtonStyles()
     {
         foreach(int val in Enum.GetValues(typeof(OutputPins)))
         {
@@ -233,7 +233,7 @@ private void CalculateRoomMass()
     }
     
 
-    private void UpdateProcessStyle(IProcessButton process){
+    private static void UpdateProcessStyle(IProcessButton process){
         processButtonStyle[process] = process.GetButtonClass();
     }
     

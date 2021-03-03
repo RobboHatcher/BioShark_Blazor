@@ -65,6 +65,10 @@ namespace BioShark_Blazor.Data {
 
         }
 
+        public Delegate[] AverageValuesDelegates(){
+            return OnAverageValues.GetInvocationList();
+        }
+
 
         public void InitSPI(){
             var settings = new SpiConnectionSettings(0,0){
@@ -93,7 +97,7 @@ namespace BioShark_Blazor.Data {
 
                     busyReading = false;
 
-                    //while(busyAveraging){}
+                    while(busyAveraging){}
                     
                     _adcControl.Write((int)ADCOutPins.ConvertStartPin, PinValue.Low);
                     _adcControl.Write((int)ADCOutPins.ConvertStartPin, PinValue.High);

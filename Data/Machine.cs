@@ -36,9 +36,6 @@ namespace BioShark_Blazor.Data {
         public Machine () {
 
             token = source.Token;
-            Random rand = new Random (DateTime.Now.Millisecond);
-            VerifyNum = rand.Next (0, 100);
-            Console.WriteLine (VerifyNum);
             _controller = new GpioController ();
             //OUTPUTS
 
@@ -78,6 +75,10 @@ namespace BioShark_Blazor.Data {
                 _controller.OpenPin (sensorPin, PinMode.Output);
                 TurnOff (sensorPin);
             }
+        }
+
+        public Delegate[] ButtonStyleDelegates(){
+            return ButtonStyleTrigger.GetInvocationList();
         }
 
         // Invokes the Tank filled event.

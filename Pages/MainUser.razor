@@ -13,6 +13,7 @@
 @using System.Xml.Serialization;
 
 
+
 <!--Singular objects used throughout the webpage are injected.
     Look at Program.cs and Startup.cs for their implementation.-->
 @inject Machine _machine
@@ -60,7 +61,7 @@
     protected override void OnInitialized(){
         
         base.OnInitialized();
-
+        Console.WriteLine("Initializing Index");
         // These statements take place in case this is the first place visited, rather than Index.razor
         if(Index.processController == null){
             Index.processController = new ProcessController(_machine, _adc);
@@ -71,22 +72,42 @@
             Index.processButtonStyle.Add(Index.processController.fillPump, Index.processController.runPump.GetButtonClass());
             Index.processButtonStyle.Add(Index.processController.autoCycle, Index.processController.runPump.GetButtonClass());
 
-            _machine.ButtonStyleTrigger += UpdateButtonStyles; // This causes all pin changes to trigger page updates.
              _fileWriter.Initialize(_machine, _adc, Index.processController);
         
-            _adc.OnAverageValues += UpdateTimeLeft;
             UpdateButtonStyles();
             UpdateTimeLeft();
         }
+
+        
     }
 
-    private void UpdateTimeLeft() {
+    protected override void OnAfterRender(bool firstRender){
+        Console.WriteLine("Page swap...");
+        try{
+            foreach(var d in _machine.ButtonStyleDelegates()){
+                _machine.ButtonStyleTrigger -= (CycleEvent)d;
+            }
+            foreach(var e in _adc.AverageValuesDelegates()){
+                _adc.OnAverageValues -= (Action)e;
+            }
+
+            _machine.ButtonStyleTrigger += UpdateButtonStyles;
+
+            _adc.OnAverageValues += UpdateTimeLeft;
+            
+        }catch(Exception ex){
+            Console.WriteLine("Index not yet initialized");
+        }
+    }
+    
+
+    public void UpdateTimeLeft() {
         Index.processController.autoCycle.UpdateEstTime();
         Index.cycleTimeLeft = Index.processController.autoCycle.estTimeLeft;
         Index.TimeEnd = DateTime.Now.Add(Index.cycleTimeLeft);
         Task.Run(async()=> await InvokeAsync(()=>this.StateHasChanged()));
     }
-    private void UpdateButtonStyles()
+    public void UpdateButtonStyles()
     {
         UpdateProcessStyle(Index.processController.runPump);
         UpdateProcessStyle(Index.processController.lowRangeOscillator);
