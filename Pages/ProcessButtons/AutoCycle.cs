@@ -11,10 +11,9 @@ namespace BioShark_Blazor.Pages.ProcessButtons {
 
     public class AutoCycle : IProcessButton {
 
-        
-        
-    
+
         protected enum processEnum {RunPump, LROsc, DrainPump, FillPump}
+
 
         private Machine machine;
         private ADC adc;
